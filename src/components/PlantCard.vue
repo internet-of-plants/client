@@ -10,7 +10,7 @@
       <p><b>Soil&nbsp;temperature:&nbsp;</b>{{status.event.soil_temperature_celsius}}ºC</p>
       <p><b>Soil&nbsp;resistivity:&nbsp;</b>
       {{status.event.soil_resistivity_raw}}&nbsp;raw&nbsp;<small>(0-1200)</small></p>
-      <p>Event&nbsp;from&nbsp;{{formatTime(status.event.created_at)}}&nbsp;ago</p>
+      <p>Event&nbsp;from&nbsp;{{formatTime(status.event.created_at - status.now)}}&nbsp;ago</p>
     </div>
   </router-link>
 </template>
@@ -25,7 +25,7 @@ export default class PlantCard extends Vue {
   status!: Status;
 
   private createdAgo(): number {
-    return this.status.now - this.status.plant.created_at;
+    return this.status.plant.created_at - this.status.now;
   }
 
   // eslint-disable-next-line class-methods-use-this

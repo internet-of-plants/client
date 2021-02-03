@@ -28,10 +28,13 @@ export interface StatusHistory {
   now: number;
 }
 
-export interface ErrorDump {
+export interface DevicePanic {
   id: number;
   plant_id: number;
-  error: string;
+  file: string;
+  line: number;
+  function: string;
+  msg: string;
   created_at: number;
 }
 

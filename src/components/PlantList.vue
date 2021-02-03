@@ -1,11 +1,14 @@
 <template>
   <div class="plants">
-    <div v-for="e in errors" v-bind:key="e.id">
+    <div v-for="p in panics" v-bind:key="p.id">
       <div class="center">
-        <h4>{{s.plant_id}}</h4>
-        <p>{{s.error}}</p>
-        <p>{{formatTime(e.created_at)}}</p>
-        <button v-on:click="solveErrorDump(e.id)">Solve</button>
+        <h4>{{p.plant_id}}</h4>
+        <p>{{p.file}}</p>
+        <p>{{p.line}}</p>
+        <p>{{p.func}}</p>
+        <p>{{p.msg}}</p>
+        <p>{{formatTime(p.created_at - status.now)}}</p>
+        <button v-on:click="solveDevicePanic(p.id)">Solve</button>
       </div>
     </div>
     <div v-if="status !== undefined">
@@ -14,13 +17,12 @@
         v-bind:key="s.plant.id"
         v-bind:status="s" />
     </div>
-    <button v-if="status !== undefined" v-on:click="newPlant()">Create New Plant</button>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { Status, ErrorDump } from '@/models';
+import { Status, DevicePanic } from '@/models';
 import PlantCard from '@/components/PlantCard.vue';
 import router from '@/router';
 import config from '@/constants';
@@ -33,7 +35,7 @@ export default class PlantList extends Vue {
   status?: Status[] = undefined;
 
   @Prop()
-  errors: ErrorDump[] = [];
+  panics: DevicePanic[] = [];
 
   interval?: number;
 
@@ -60,7 +62,7 @@ export default class PlantList extends Vue {
 
     this.status = await response.json();
 
-    response = await fetch(`${config.API_HOST}/error/index`, { headers: { Authorization: `Basic ${token}` } });
+    response = await fetch(`${config.API_HOST}/panic/index`, { headers: { Authorization: `Basic ${token}` } });
 
     if (response.status === 403) {
       sessionStorage.removeItem('token');
@@ -68,26 +70,7 @@ export default class PlantList extends Vue {
       return;
     }
 
-    this.errors = (await response.json()).value;
-  }
-
-  private async newPlant(): Promise<void> {
-    const token = this.getToken();
-    if (token === undefined) {
-      sessionStorage.removeItem('token');
-      router.push({ path: '/login' });
-      return;
-    }
-
-    const response = await fetch(`${config.API_HOST}/plant`, { method: 'POST', headers: { Authorization: `Basic ${token}` } });
-
-    if (response.status === 403) {
-      sessionStorage.removeItem('token');
-      router.push({ path: '/login' });
-      return;
-    }
-
-    await this.fetchData();
+    this.panics = (await response.json()).value;
   }
 
   async mounted() {
@@ -101,7 +84,7 @@ export default class PlantList extends Vue {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private async solveErrorDump(id: number): Promise<void> {
+  private async solveDevicePanic(id: number): Promise<void> {
     const token = this.getToken();
     if (token === undefined) {
       sessionStorage.removeItem('token');
@@ -109,7 +92,7 @@ export default class PlantList extends Vue {
       return;
     }
 
-    const response = await fetch(`${config.API_HOST}/stacktrace?id=${id}`, { method: 'DELETE', headers: { Authorization: `Basic ${token}` } });
+    const response = await fetch(`${config.API_HOST}/panic?id=${id}`, { method: 'DELETE', headers: { Authorization: `Basic ${token}` } });
 
     if (response.status === 403) {
       sessionStorage.removeItem('token');

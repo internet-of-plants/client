@@ -13,7 +13,7 @@
           <p><b>Soil&nbsp;temperature:&nbsp;</b>{{status.event.soil_temperature_celsius}}ºC</p>
           <p><b>Soil&nbsp;resistivity:&nbsp;</b>
           {{status.event.soil_resistivity_raw}}&nbsp;raw&nbsp;<small>(0-1200)</small></p>
-          <p>Event&nbsp;from&nbsp;{{formatTime(status.event.created_at)}}&nbsp;ago</p>
+          <p>Event&nbsp;from&nbsp;{{formatTime(status.event.created_at - status.now)}}&nbsp;ago</p>
         </div>
       </div>
     </div>
