@@ -13,33 +13,31 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { defineComponent, reactive, onMounted } from 'vue';
 import config from '@/constants';
 import router from '@/router';
 
-@Component
-export default class Login extends Vue {
-  @Prop()
-  private user: { email: string; password: string } = { email: '', password: '' };
+export default defineComponent({
+  name: 'Login',
+  setup() {
+    const user = reactive({ email: '', password: '' });
+    onMounted(() => {
+      if (sessionStorage.getItem('token') !== null) {
+        router.push({ path: '/' });
+      }
+    });
 
-  // eslint-disable-next-line class-methods-use-this
-  async mounted() {
-    if (sessionStorage.getItem('token') !== null) {
+    const login = async () => {
+      const req = await fetch(`${config.API_HOST}/user/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(user) });
+      if (req.status === 200) {
+        sessionStorage.setItem('token', await req.text());
+      }
       router.push({ path: '/' });
-    }
-  }
+    };
 
-  // eslint-disable-next-line class-methods-use-this
-  private loginUrl(): string {
-    return `${config.API_HOST}/user/login`;
-  }
-
-  private async login() {
-    const req = await fetch(this.loginUrl(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.user) });
-    sessionStorage.setItem('token', await req.text());
-    router.push({ path: '/' });
-  }
-}
+    return { user, login };
+  },
+});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -49,5 +47,5 @@ a {
 }
 
 body { width: 100%; margin: 0; padding: 0;}
-.login { width: 100%; padding: 0; margin: 0; }
+.plants { width: 100%; padding: 0; margin: 0; }
 </style>

@@ -1,17 +1,17 @@
 <template>
-  <div class="plant-view">
-    <Plant/>
+  <div class="plants-view">
+    <PlantList/>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import Plant from '@/components/Plant.vue';
+import PlantList from '@/components/PlantList.vue';
 
 export default defineComponent({
-  name: 'PlantView',
+  name: 'PlantListView',
   components: {
-    Plant,
+    PlantList,
   },
 });
 </script>

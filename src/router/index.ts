@@ -1,42 +1,31 @@
-import Vue from 'vue';
-import VueRouter, { RouteConfig } from 'vue-router';
-import Home from '@/views/Home.vue';
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import PlantListView from '@/views/PlantListView.vue';
 import PlantView from '@/views/PlantView.vue';
 import LoginView from '@/views/LoginView.vue';
-import SignupView from '@/views/SignupView.vue';
 
-Vue.use(VueRouter);
-
-const routes: Array<RouteConfig> = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Home',
-    component: Home,
     meta: { title: 'Plants' },
-  },
-  {
-    path: '/plant/:id',
-    name: 'PlantView',
-    component: PlantView,
-    meta: { title: 'Plant' },
+    component: PlantListView,
   },
   {
     path: '/login',
-    name: 'LoginView',
-    component: LoginView,
+    name: 'Login',
     meta: { title: 'Login' },
+    component: LoginView,
   },
   {
-    path: '/signup',
-    name: 'SignupView',
-    component: SignupView,
-    meta: { title: 'Signup' },
+    path: '/plant/:id',
+    name: 'Plant',
+    meta: { title: 'Plant' },
+    component: PlantView,
   },
 ];
 
-const router = new VueRouter({
-  mode: 'history',
-  base: '/',
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
   routes,
 });
 
