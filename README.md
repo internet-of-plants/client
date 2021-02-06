@@ -8,8 +8,6 @@ You can't automate what you don't personally understand, or without a specialist
 
 It's not there yet.
 
-It also take very bad decisions around managing local state, without using vuex and going for mutating props. Fetching data at the component level. Which is very bad. But it started as a proof-of-concept and outgrown itself. Nobody yet has taken the time (or suffered the consequences of that decision) to fix it, so it is how it is. But yes, we very much would like to fix this. If you can, go for it, we will be very happy. But as far as life goes someone is yet to make us happy.
-
 ## Signup
 
 To signup go to `/signup`.
