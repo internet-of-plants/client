@@ -11,11 +11,11 @@ fi
 cp $SCRIPTPATH/dist/index.html $SCRIPTPATH/dist/404.html
 cp $SCRIPTPATH/LICENSE.md $SCRIPTPATH/dist/
 
-mkdir -p $SCRIPTPATH/../static
-rm $SCRIPTPATH/../static/** -r
-cp $SCRIPTPATH/dist/** $SCRIPTPATH/../static/ -r
+mkdir -p $SCRIPTPATH/../internet-of-plants.github.io
+rm $SCRIPTPATH/../internet-of-plants.github.io/** -r
+cp $SCRIPTPATH/dist/** $SCRIPTPATH/../internet-of-plants.github.io/ -r
 
-cd $SCRIPTPATH/../static
+cd $SCRIPTPATH/../internet-of-plants.github.io
   git add -A
   git commit --amend -m "Initial Commit"
   git push origin master -f
