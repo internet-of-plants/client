@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import PlantListView from '@/views/PlantListView.vue';
 import PlantView from '@/views/PlantView.vue';
 import LoginView from '@/views/LoginView.vue';
-import SignupView from '@/views/LoginView.vue';
+import SignupView from '@/views/SignupView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
