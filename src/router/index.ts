@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import PlantListView from '@/views/PlantListView.vue';
 import PlantView from '@/views/PlantView.vue';
 import LoginView from '@/views/LoginView.vue';
+import SignupView from '@/views/LoginView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -15,6 +16,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Login',
     meta: { title: 'Login' },
     component: LoginView,
+  },
+  {
+    path: '/signup',
+    name: 'Signup',
+    meta: { title: 'Signup' },
+    component: SignupView,
   },
   {
     path: '/plant/:id',
