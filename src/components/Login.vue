@@ -28,7 +28,7 @@ export default defineComponent({
     });
 
     const login = async () => {
-      const req = await fetch(`${config.API_HOST}/user/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(user) });
+      const req = await fetch(`${config.API_HOST}/v1/user/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(user) });
       if (req.status === 200) {
         sessionStorage.setItem('token', await req.text());
       }

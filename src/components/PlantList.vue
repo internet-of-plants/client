@@ -55,7 +55,7 @@ export default defineComponent({
       }
 
       (async () => {
-        const response = await fetch(`${config.API_HOST}/panic/index`, { headers: { Authorization: `Basic ${token}` } });
+        const response = await fetch(`${config.API_HOST}/v1/panic/index`, { headers: { Authorization: `Basic ${token}` } });
 
         if (response.status === 403) {
           sessionStorage.removeItem('token');
@@ -68,7 +68,7 @@ export default defineComponent({
       })();
 
       (async () => {
-        const response = await fetch(`${config.API_HOST}/plant/index`, { headers: { Authorization: `Basic ${token}` } });
+        const response = await fetch(`${config.API_HOST}/v1/plant/index`, { headers: { Authorization: `Basic ${token}` } });
 
         if (response.status === 403) {
           sessionStorage.removeItem('token');
@@ -108,7 +108,7 @@ export default defineComponent({
         return;
       }
 
-      const response = await fetch(`${config.API_HOST}/panic?id=${id}`, { method: 'DELETE', headers: { Authorization: `Basic ${token}` } });
+      const response = await fetch(`${config.API_HOST}/v1/panic?id=${id}`, { method: 'DELETE', headers: { Authorization: `Basic ${token}` } });
 
       if (response.status === 403) {
         sessionStorage.removeItem('token');

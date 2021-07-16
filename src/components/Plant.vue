@@ -53,7 +53,7 @@ export default defineComponent({
 
       (async () => {
         const secsAgo = 30 * 60;
-        const response = await fetch(`${config.API_HOST}/plant/history?id=${id}&since_secs_ago=${secsAgo}`, { headers: { Authorization: `Basic ${token}` } });
+        const response = await fetch(`${config.API_HOST}/v1/plant/history?id=${id}&since_secs_ago=${secsAgo}`, { headers: { Authorization: `Basic ${token}` } });
 
         if (response.status === 403) {
           sessionStorage.removeItem('token');
@@ -65,7 +65,7 @@ export default defineComponent({
       })();
 
       (async () => {
-        const response = await fetch(`${config.API_HOST}/plant?id=${id}`, { headers: { Authorization: `Basic ${token}` } });
+        const response = await fetch(`${config.API_HOST}/v1/plant?id=${id}`, { headers: { Authorization: `Basic ${token}` } });
 
         if (response.status === 403) {
           sessionStorage.removeItem('token');
