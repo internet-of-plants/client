@@ -18,5 +18,5 @@ cp $SCRIPTPATH/dist/** $SCRIPTPATH/../internet-of-plants.github.io/ -r
 cd $SCRIPTPATH/../internet-of-plants.github.io
   git add -A
   git commit --amend -m "Initial Commit"
-  git push origin master -f
+  git push origin main -f
 cd -
