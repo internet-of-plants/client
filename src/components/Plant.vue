@@ -1,8 +1,24 @@
 <template>
-  <div class="plant">
+  <div class="plant" v-if="!!data.status">
+    <div v-for="p in panics" v-bind:key="p.id">
+      <div class="center">
+        <h4>{{p.plant_id}}</h4>
+        <p>{{p.file}}</p>
+        <p>{{p.line}}</p>
+        <p>{{p.func}}</p>
+        <p>{{p.msg}}</p>
+        <p>{{formatTime(p.created_at - data.status.now)}}</p>
+        <button v-on:click="solveDevicePanic(p.id)">Solve</button>
+      </div>
+    </div>
+
     <div class="flex">
       <div class="info" v-if="!!data.status">
         <p><b>Name:&nbsp;</b>{{data.status.plant.name}}</p>
+        <p><b>Last Update Version:&nbsp;</b>{{data.status.plant.version}}</p>
+        <p><b>Last Update MD5:&nbsp;</b>{{data.status.plant.file_hash}}</p>
+        <p v-if="!!data.status.event"><b>Last Event MD5:&nbsp;</b>{{data.status.event.hash}}</p>
+        <p v-if="!data.status.event"><b>Last Event MD5:&nbsp;</b></p>
         <p v-if="!!data.status.plant.description"><b>Description:&nbsp;</b>{{
           data.status.plant.description}}</p>
         <p>Created {{formatTime(data.status.now - data.status.plant.created_at)}} ago</p>
@@ -19,6 +35,17 @@
         </div>
       </div>
     </div>
+    <form class="upload" ref="form" v-on:submit.prevent="uploadBinary">
+      <div>
+        <label for="version">Version:</label>
+        <input type="text" name="version" v-model="version" />
+      </div>
+      <div>
+        <label for="binary">Binary File:</label>
+        <input type="file" accept=".bin,.bin.gz" name="binary" />
+      </div>
+      <button type="submit">Upload New Version</button>
+    </form>
     <PlantHistory
       v-if="!!data.history"
       v-bind:history="data.history" />
@@ -26,9 +53,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive } from 'vue';
+import {
+  defineComponent,
+  onMounted,
+  reactive,
+  ref,
+} from 'vue';
 import { useRoute } from 'vue-router';
-import { EventHistory, Status } from '@/models';
+import { EventHistory, Status, DevicePanic } from '@/models';
 import config from '@/constants';
 import router from '@/router';
 
@@ -39,9 +71,15 @@ export default defineComponent({
       status?: Status;
       history?: EventHistory;
     } = reactive({});
+    const form = ref<HTMLFormElement | null>(null);
+    const version: string | null = null;
+
+    const panics: Array<DevicePanic> = reactive([]);
+    let id: string | null = null;
 
     onMounted(async () => {
-      const { id } = useRoute().params;
+      const plantId = useRoute().params.id;
+      id = (typeof plantId === typeof [] ? plantId[0] : plantId) as string;
       document.title = `Plant ${id}`;
 
       const token = sessionStorage.getItem('token') ?? undefined;
@@ -50,6 +88,31 @@ export default defineComponent({
         router.push({ path: '/login' });
         return;
       }
+
+      (async () => {
+        const response = await fetch(`${config.API_HOST}/v1/plant?id=${id}`, { headers: { Authorization: `Basic ${token}` } });
+
+        if (response.status === 403) {
+          sessionStorage.removeItem('token');
+          router.push({ path: '/login' });
+          return;
+        }
+
+        data.status = await response.json();
+      })();
+
+      (async () => {
+        const response = await fetch(`${config.API_HOST}/v1/panic?id=${id}`, { headers: { Authorization: `Basic ${token}` } });
+
+        if (response.status === 403) {
+          sessionStorage.removeItem('token');
+          router.push({ path: '/login' });
+          return;
+        }
+
+        const newPanics: Array<DevicePanic> = await response.json();
+        panics.push(...newPanics);
+      })();
 
       (async () => {
         const secsAgo = 30 * 60;
@@ -62,18 +125,6 @@ export default defineComponent({
         }
 
         data.history = await response.json();
-      })();
-
-      (async () => {
-        const response = await fetch(`${config.API_HOST}/v1/plant?id=${id}`, { headers: { Authorization: `Basic ${token}` } });
-
-        if (response.status === 403) {
-          sessionStorage.removeItem('token');
-          router.push({ path: '/login' });
-          return;
-        }
-
-        data.status = await response.json();
       })();
     });
 
@@ -95,8 +146,48 @@ export default defineComponent({
       return `${hoursString}h:${minutesString}m`;
     };
 
+    // eslint-disable-next-line class-methods-use-this
+    const solveDevicePanic = async (panicId: number): Promise<void> => {
+      const token = sessionStorage.getItem('token') ?? undefined;
+      if (token === undefined) {
+        sessionStorage.removeItem('token');
+        router.push({ path: '/login' });
+        return;
+      }
+
+      const response = await fetch(`${config.API_HOST}/v1/panic?id=${panicId}`, { method: 'DELETE', headers: { Authorization: `Basic ${token}` } });
+
+      if (response.status === 403) {
+        sessionStorage.removeItem('token');
+        router.push({ path: '/login' });
+        return;
+      }
+
+      router.go(0);
+    };
+
+    const uploadBinary = async () => {
+      if (!form?.value) throw new Error('Form is null');
+      const body = new FormData(form.value);
+
+      const token = sessionStorage.getItem('token') ?? undefined;
+      if (token === undefined) {
+        sessionStorage.removeItem('token');
+        router.push({ path: '/login' });
+        return;
+      }
+
+      const response = await fetch(`${config.API_HOST}/v1/update/${id}`, { method: 'POST', body, headers: { Authorization: `Basic ${token}` } });
+      if (response.status === 403) {
+        sessionStorage.removeItem('token');
+        router.push({ path: '/login' });
+        return;
+      }
+      router.push({ path: '/' });
+    };
+
     return {
-      data, formatTime,
+      data, formatTime, panics, solveDevicePanic, version, uploadBinary, form,
     };
   },
 });

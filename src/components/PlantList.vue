@@ -7,7 +7,7 @@
         <p>{{p.line}}</p>
         <p>{{p.func}}</p>
         <p>{{p.msg}}</p>
-        <p>{{formatTime(p.created_at - status.now)}}</p>
+        <p>{{formatTime(p.created_at - now)}}</p>
         <button v-on:click="solveDevicePanic(p.id)">Solve</button>
       </div>
     </div>
@@ -16,7 +16,11 @@
       <router-link v-bind:to="`/plant/${status.plant.id}`"
           class="plant-card">
         <p><b>Id:&nbsp;</b>{{status.plant.id}}</p>
-        <!--<p><b>Name:&nbsp;</b>{{status.plant.name}}</p>-->
+        <p><b>Name:&nbsp;</b>{{status.plant.name}}</p>
+        <p><b>Last Update Version:&nbsp;</b>{{status.plant.version}}</p>
+        <p><b>Last Update MD5:&nbsp;</b>{{status.plant.file_hash}}</p>
+        <p v-if="!!status.event"><b>Last Event MD5:&nbsp;</b>{{status.event.hash}}</p>
+        <p v-if="!status.event"><b>Last Event MD5:&nbsp;</b></p>
         <p v-if="!!status.plant.description"><b>Description:&nbsp;</b>
         {{status.plant.description}}</p>
         <p><b>Created:&nbsp;</b>{{formatTime(status.now - status.plant.created_at)}}&nbsp;ago</p>
@@ -120,7 +124,7 @@ export default defineComponent({
     };
 
     return {
-      statuses, panics, solveDevicePanic, formatTime,
+      statuses, panics, solveDevicePanic, formatTime, now: statuses[0]?.now ?? 0,
     };
   },
 });
