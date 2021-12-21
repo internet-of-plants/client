@@ -33,7 +33,7 @@ yarn lint
 ```
 ## Deploy
 
-Since this project is a simple static folder (when compiled), we use github pages. At [`https://github.com/internet-of-plants/monitor`](https://github.com/internet-of-plants/monitor/).
+Since this project is a simple static folder (when compiled), we use github pages. At [`https://github.com/internet-of-plants/internet-of-plants.github.io`](https://github.com/internet-of-plants/internet-of-plants.github.io).
 
 First you need writing permissions to the repository quoted above.
 
@@ -41,7 +41,7 @@ Then you have to git clone the repository quoted above, in the parent folder of 
 
 ```
 cd .. # Assuming you are in this project's folder
-git clone git@github.com:internet-of-plants/monitor.git
+git clone git@github.com:internet-of-plants/internet-of-plants.github.io.git
 mv monitor static
 ```
 
