@@ -1,6 +1,6 @@
 # Internet of Plants Monitor Client
 
-**Live at:** [`https://internet-of-plants.github.io/monitor/`](https://internet-of-plants.github.io/monitor/)
+**Live at:** [`https://internet-of-plants.github.io/`](https://internet-of-plants.github.io/)
 
 This is the client that is used to monitor (keep track / order around) the iot devices. It is supposed to generate useful graphics and allows you to also keep track at scale of your devices. The idea is to utilize human input together with a bunch of data to better manage the devices.
 
