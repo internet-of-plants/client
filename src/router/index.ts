@@ -1,33 +1,65 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import PlantListView from '@/views/PlantListView.vue';
-import PlantView from '@/views/PlantView.vue';
+import WorkspacesView from '@/views/WorkspacesView.vue';
+import CollectionsView from '@/views/CollectionsView.vue';
+import DevicesView from '@/views/DevicesView.vue';
+import DeviceView from '@/views/DeviceView.vue';
 import LoginView from '@/views/LoginView.vue';
 import SignupView from '@/views/SignupView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'Home',
-    meta: { title: 'Plants' },
-    component: PlantListView,
+    name: 'HomeView',
+    meta: { title: 'Workspaces' },
+    component: WorkspacesView,
+  },
+  {
+    path: '/workspace',
+    name: 'WorkspacesView',
+    meta: { title: 'Workspaces' },
+    component: WorkspacesView,
+  },
+  {
+    path: '/workspace/:workspaceId',
+    name: 'WorkspaceView',
+    meta: { title: 'Collections' },
+    component: CollectionsView,
+  },
+  {
+    path: '/workspace/:workspaceId/collection',
+    name: 'CollectionsView',
+    meta: { title: 'Collections' },
+    component: CollectionsView,
+  },
+  {
+    path: '/workspace/:workspaceId/collection/:collectionId',
+    name: 'CollectionView',
+    meta: { title: 'Devices' },
+    component: DevicesView,
+  },
+  {
+    path: '/workspace/:workspaceId/collection/:collectionId/device',
+    name: 'DevicesView',
+    meta: { title: 'Devices' },
+    component: DevicesView,
+  },
+  {
+    path: '/workspace/:workspaceId/collection/:collectionId/device/:deviceId',
+    name: 'DeviceView',
+    meta: { title: 'Device' },
+    component: DeviceView,
   },
   {
     path: '/login',
-    name: 'Login',
+    name: 'LoginView',
     meta: { title: 'Login' },
     component: LoginView,
   },
   {
     path: '/signup',
-    name: 'Signup',
+    name: 'SignupView',
     meta: { title: 'Signup' },
     component: SignupView,
-  },
-  {
-    path: '/plant/:id',
-    name: 'Plant',
-    meta: { title: 'Plant' },
-    component: PlantView,
   },
 ];
 

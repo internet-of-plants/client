@@ -1,19 +1,99 @@
+export interface Workspace {
+  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Collection {
+  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Device {
+  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  name: string;
+  description?: string;
+  mac: string;
+  file_hash: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LastUpdate {
+  version: string;
+  file_hash: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LastEvent {
+  air_temperature_celsius: number;
+  air_humidity_percentage: number;
+  air_heat_index_celsius: number;
+  soil_resistivity_raw: number;
+  soil_temperature_celsius: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DeviceView {
+  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  name: string;
+  description?: string;
+  mac: string;
+  file_hash: string;
+  last_update?: LastUpdate;
+  last_event?: LastEvent;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CollectionView {
+  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  name: string;
+  description?: string;
+  device: Array<Device>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkspaceView {
+  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  name: string;
+  description?: string;
+  collections: Array<Collection>;
+  members: Array<string>; // username
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DeviceLog {
+  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  log: string;
+  created_at: string;
+}
+
 export interface Plant {
-    id: string;
-    name: string;
-    description?: string;
-    owner_id: number;
-    created_at: number;
+  id: string;
+  name: string;
+  description?: string;
+  owner_id: number;
+  created_at: string;
 }
 
 export interface Event {
-    id: number;
-    air_temperature_celsius: number;
-    air_humidity_percentage: number;
-    soil_resistivity_raw: number;
-    soil_temperature_celsius: number;
-    plant_id: number;
-    created_at: number;
+  id: number;
+  air_temperature_celsius: number;
+  air_humidity_percentage: number;
+  soil_resistivity_raw: number;
+  soil_temperature_celsius: number;
+  plant_id: number;
+  created_at: string;
 }
 
 export interface Status {
@@ -23,13 +103,14 @@ export interface Status {
 }
 
 export interface DevicePanic {
-    id: number;
-    plant_id: number;
-    file: string;
-    line: number;
-    function: string;
-    msg: string;
-    created_at: number;
+  id: number;
+  plant_id: number;
+  file: string;
+  line: number;
+  function: string;
+  msg: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface EventHistory {
