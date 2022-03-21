@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import WorkspacesView from '@/views/WorkspacesView.vue';
+import OrganizationsView from '@/views/OrganizationsView.vue';
 import CollectionsView from '@/views/CollectionsView.vue';
 import DevicesView from '@/views/DevicesView.vue';
 import DeviceView from '@/views/DeviceView.vue';
@@ -10,41 +10,41 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'HomeView',
-    meta: { title: 'Workspaces' },
-    component: WorkspacesView,
+    meta: { title: 'Organizations' },
+    component: OrganizationsView,
   },
   {
-    path: '/workspace',
-    name: 'WorkspacesView',
-    meta: { title: 'Workspaces' },
-    component: WorkspacesView,
+    path: '/organization',
+    name: 'OrganizationsView',
+    meta: { title: 'Organizations' },
+    component: OrganizationsView,
   },
   {
-    path: '/workspace/:workspaceId',
-    name: 'WorkspaceView',
+    path: '/organization/:organizationId',
+    name: 'OrganizationView',
     meta: { title: 'Collections' },
     component: CollectionsView,
   },
   {
-    path: '/workspace/:workspaceId/collection',
+    path: '/organization/:organizationId/collection',
     name: 'CollectionsView',
     meta: { title: 'Collections' },
     component: CollectionsView,
   },
   {
-    path: '/workspace/:workspaceId/collection/:collectionId',
+    path: '/organization/:organizationId/collection/:collectionId',
     name: 'CollectionView',
     meta: { title: 'Devices' },
     component: DevicesView,
   },
   {
-    path: '/workspace/:workspaceId/collection/:collectionId/device',
+    path: '/organization/:organizationId/collection/:collectionId/device',
     name: 'DevicesView',
     meta: { title: 'Devices' },
     component: DevicesView,
   },
   {
-    path: '/workspace/:workspaceId/collection/:collectionId/device/:deviceId',
+    path: '/organization/:organizationId/collection/:collectionId/device/:deviceId',
     name: 'DeviceView',
     meta: { title: 'Device' },
     component: DeviceView,

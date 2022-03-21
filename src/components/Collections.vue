@@ -1,8 +1,8 @@
 <template>
-  <div class="collections" v-if="workspace">
+  <div class="collections" v-if="organization">
     <!-- Eventually show more details here, like the last event, if there are unsolved panics.. -->
-    <div v-for="c in workspace.collections" :key="c.id">
-      <router-link :to="`/workspace/${workspace.id}/collection/${c.id}`" class="center card">
+    <div v-for="c in organization.collections" :key="c.id">
+      <router-link :to="`/organization/${organization.id}/collection/${c.id}`" class="center card">
        <!-- Devices length should be at least 1, can we ensure that? -->
        <!--<template v-if="c.devices.length === 1">-->j
          <h4>{{c.name}}</h4>
@@ -19,14 +19,14 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { WorkspaceView } from '@/models';
+import { OrganizationView } from '@/models';
 import config from '@/constants';
 import router from '@/router';
 
 export default defineComponent({
   name: 'Collections',
   setup() {
-    const workspace = ref<WorkspaceView | null>(null);
+    const organization = ref<OrganizationView | null>(null);
 
     onMounted(async () => {
       const token = sessionStorage.getItem('token') ?? undefined;
@@ -37,8 +37,8 @@ export default defineComponent({
       }
 
       (async () => {
-        const { workspaceId } = useRoute().params;
-        const response = await fetch(`${config.API_HOST}/v1/workspace/${workspaceId}`, {
+        const { organizationId } = useRoute().params;
+        const response = await fetch(`${config.API_HOST}/v1/organization/${organizationId}`, {
           headers: { Authorization: `Basic ${token}` },
         });
 
@@ -48,15 +48,15 @@ export default defineComponent({
           return;
         }
 
-        const w: WorkspaceView = await response.json();
-        workspace.value = w;
+        const w: OrganizationView = await response.json();
+        organization.value = w;
         if (w.collections?.length === 1) {
-          router.push({ path: `/workspace/${workspaceId}/collection/${w.collections[0].id}` });
+          router.push({ path: `/organization/${organizationId}/collection/${w.collections[0].id}` });
         }
       })();
     });
 
-    return { workspace };
+    return { organization };
   },
 });
 </script>

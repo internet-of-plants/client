@@ -3,7 +3,7 @@
     <!-- Eventually show more details here, like the ammount of devices/devices, the time of the
          last event, if there are any unsolved panics... -->
     <div v-for="d in collection.devices" :key="d.id">
-      <router-link :to="`/workspace/${workspaceId}/collection/${collection.id}/device/${d.id}`"
+      <router-link :to="`/organization/${organizationId}/collection/${collection.id}/device/${d.id}`"
        class="center card">
         <DeviceCard :device="d"/>
       </router-link>
@@ -26,7 +26,7 @@ export default defineComponent({
   },
   setup() {
     const collection = ref<CollectionView | null>(null);
-    const { workspaceId, collectionId } = useRoute().params;
+    const { organizationId, collectionId } = useRoute().params;
 
     onMounted(async () => {
       const token = sessionStorage.getItem('token') ?? undefined;
@@ -37,7 +37,7 @@ export default defineComponent({
       }
 
       (async () => {
-        const url = `${config.API_HOST}/v1/workspace/${workspaceId}/collection/${collectionId}`;
+        const url = `${config.API_HOST}/v1/organization/${organizationId}/collection/${collectionId}`;
         const response = await fetch(url, { headers: { Authorization: `Basic ${token}` } });
 
         if (response.status === 403) {
@@ -51,7 +51,7 @@ export default defineComponent({
     });
 
     return {
-      collection, workspaceId,
+      collection, organizationId,
     };
   },
 });

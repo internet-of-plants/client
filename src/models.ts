@@ -1,4 +1,4 @@
-export interface Workspace {
+export interface Organization {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
   description?: string;
@@ -62,7 +62,7 @@ export interface CollectionView {
   updated_at: string;
 }
 
-export interface WorkspaceView {
+export interface OrganizationView {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
   description?: string;

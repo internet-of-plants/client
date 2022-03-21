@@ -91,7 +91,7 @@ export default defineComponent({
     const version: string | null = null;
 
     const panics = ref<Array<DevicePanic>>([]);
-    const { workspaceId, collectionId, deviceId } = useRoute().params;
+    const { organizationId, collectionId, deviceId } = useRoute().params;
 
     onMounted(async () => {
       const token = sessionStorage.getItem('token') ?? undefined;
@@ -102,7 +102,7 @@ export default defineComponent({
       }
 
       (async () => {
-        const response = await fetch(`${config.API_HOST}/v1/workspace/${workspaceId}/collection/${collectionId}/device/${deviceId}`, { headers: { Authorization: `Basic ${token}` } });
+        const response = await fetch(`${config.API_HOST}/v1/organization/${organizationId}/collection/${collectionId}/device/${deviceId}`, { headers: { Authorization: `Basic ${token}` } });
 
         if (response.status === 403) {
           sessionStorage.removeItem('token');
@@ -116,7 +116,7 @@ export default defineComponent({
       })();
 
       (async () => {
-        const response = await fetch(`${config.API_HOST}/v1/workspace/${workspaceId}/collection/${collectionId}/device/${deviceId}/log/last/3`, {
+        const response = await fetch(`${config.API_HOST}/v1/organization/${organizationId}/collection/${collectionId}/device/${deviceId}/log/last/3`, {
           headers: { Authorization: `Basic ${token}` },
         });
 
@@ -130,7 +130,7 @@ export default defineComponent({
       })();
 
       (async () => {
-        const response = await fetch(`${config.API_HOST}/v1/workspace/${workspaceId}/collection/${collectionId}/device/${deviceId}/panic/last/3`, {
+        const response = await fetch(`${config.API_HOST}/v1/organization/${organizationId}/collection/${collectionId}/device/${deviceId}/panic/last/3`, {
           headers: { Authorization: `Basic ${token}` },
         });
 
@@ -185,7 +185,7 @@ export default defineComponent({
         return;
       }
 
-      const response = await fetch(`${config.API_HOST}/v1/workspace/${workspaceId}/collection/${collectionId}/device/${deviceId}/panic/solve/${panicId}`, {
+      const response = await fetch(`${config.API_HOST}/v1/organization/${organizationId}/collection/${collectionId}/device/${deviceId}/panic/solve/${panicId}`, {
         method: 'POST',
         headers: { Authorization: `Basic ${token}` },
       });
