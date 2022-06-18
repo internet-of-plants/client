@@ -12,32 +12,24 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive, onMounted } from 'vue';
+<script setup lang="ts">
+import { reactive } from 'vue';
 import config from '@/constants';
 import router from '@/router';
 
-export default defineComponent({
-  name: 'Login',
-  setup() {
-    const user = reactive({ email: '', password: '' });
-    onMounted(() => {
-      if (sessionStorage.getItem('token') !== null) {
-        router.push({ path: '/' });
-      }
-    });
+const user = reactive({ email: '', password: '' });
 
-    const login = async () => {
-      const req = await fetch(`${config.API_HOST}/v1/user/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(user) });
-      if (req.status === 200) {
-        sessionStorage.setItem('token', await req.text());
-      }
-      router.push({ path: '/' });
-    };
+if (localStorage.getItem('token') !== null) {
+  router.push({ path: '/' });
+}
 
-    return { user, login };
-  },
-});
+const login = async () => {
+  const req = await fetch(`${config.API_HOST}/v1/user/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(user) });
+  if (req.status === 200) {
+    localStorage.setItem('token', await req.text());
+  }
+  router.push({ path: '/' });
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

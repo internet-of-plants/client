@@ -4,14 +4,6 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import Devices from '@/components/Devices.vue';
-
-export default defineComponent({
-  name: 'DevicesView',
-  components: {
-    Devices,
-  },
-});
 </script>

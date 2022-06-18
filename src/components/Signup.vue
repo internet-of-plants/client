@@ -16,40 +16,37 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive, onMounted } from 'vue';
-import config from '@/constants';
-import router from '@/router';
+<script setup lang="ts">
+import { ref } from "vue";
+import config from "@/constants";
+import router from "@/router";
 
-export default defineComponent({
-  name: 'Signup',
-  setup() {
-    const user = reactive({ email: '', username: '', password: '' });
-    onMounted(() => {
-      if (sessionStorage.getItem('token') !== null) {
-        router.push({ path: '/' });
-      }
-    });
+const user = ref({ email: "", username: "", password: "" });
+if (localStorage.getItem("token") !== null) {
+  router.push({ path: "/" });
+}
 
-    const signup = async () => {
-      const req = await fetch(`${config.API_HOST}/v1/user`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(user) });
-      if (req.status === 200) {
-        sessionStorage.setItem('token', await req.text());
-      }
-      router.push({ path: '/' });
-    };
-
-    return { user, signup };
-  },
-});
+const signup = async () => {
+  const req = await fetch(`${config.API_HOST}/v1/user`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(user.value),
+  });
+  if (req.status === 200) {
+    localStorage.setItem("token", await req.text());
+  }
+  router.push({ path: "/" });
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 a {
   color: #42b983;
 }
 
-body { width: 100%; margin: 0; padding: 0;}
-.plants { width: 100%; padding: 0; margin: 0; }
+body {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
 </style>

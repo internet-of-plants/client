@@ -1,52 +1,41 @@
 <template>
   <div class="flex device info card">
-    <p><b>Name:&nbsp;</b>{{device.name}}</p>
-    <p><b>MAC:&nbsp;</b>{{device.mac}}</p>
-    <p><b>File Hash:&nbsp;</b>{{device.file_hash}}</p>
-    <p v-if="device.description"><b>Description:&nbsp;</b>{{device.description}}</p>
-    <p>Created at {{formatTime(now() - new Date(device.created_at))}} ago</p>
-    <p>Updated at {{formatTime(now() - new Date(device.updated_at))}} ago</p>
+    <p><b>Name:&nbsp;</b>{{props.device.name}}</p>
+    <p><b>MAC:&nbsp;</b>{{props.device.mac}}</p>
+    <p v-if="props.device.description"><b>Description:&nbsp;</b>{{props.device.description}}</p>
+    <p>Created at {{formatTime(now() - new Date(props.device.createdAt))}} ago</p>
+    <p>Updated at {{formatTime(now() - new Date(props.device.updatedAt))}} ago</p>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
 import { Device } from '@/models';
 
-export default defineComponent({
-  name: 'DeviceCard',
-  props: {
-    device: {
-      type: Object as PropType<Device>,
-      required: true,
-    },
-  },
-  setup() {
-    const formatTime = (milliseconds: number): string => {
-      const seconds = Math.floor(milliseconds / 1000);
-      if (seconds <= 0) {
-        return '00h:00m';
-      }
+const props = defineProps<{
+  device: Device;
+}>();
 
-      if (!Number.isFinite(seconds)) {
-        return 'Never';
-      }
+const formatTime = (milliseconds: number): string => {
+  const seconds = Math.floor(milliseconds / 1000);
+  if (seconds <= 0) {
+    return '00h:00m';
+  }
 
-      const hours = Math.floor(seconds / 3600);
-      const hoursString = `0${hours}`.slice(-2);
+  if (!Number.isFinite(seconds)) {
+    return 'Never';
+  }
 
-      const minutes = Math.floor((seconds / 60) % 60);
-      const minutesString = `0${minutes}`.slice(-2);
+  const hours = Math.floor(seconds / 3600);
+  const hoursString = `0${hours}`.slice(-2);
 
-      return `${hoursString}h:${minutesString}m`;
-    };
-    const now = () => new Date();
-    return { formatTime, now };
-  },
-});
+  const minutes = Math.floor((seconds / 60) % 60);
+  const minutesString = `0${minutes}`.slice(-2);
+
+  return `${hoursString}h:${minutesString}m`;
+};
+const now = () => new Date();
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 a {
   color: inherit !important;

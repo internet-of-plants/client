@@ -1,7 +1,122 @@
+export interface Compiler {
+  id: number;
+  sensors: Sensor[];
+  target: Target;
+  latestFirmware: Firmware;
+}
+
+export interface Compilation {
+  id: number;
+  compiler: Compiler;
+  platformioIni: string;
+  mainCpp: string;
+  pinHpp: string;
+}
+
+export interface Target {
+  id: number;
+  arch: string;
+  build_flags: string;
+  platform: string;
+  framework: string | null;
+  platform_packages: string;
+  extra_platformio_params: string;
+  ldf_mode: string | null;
+  board: string | null;
+}
+
+export interface Board {
+  id: number;
+  name: string;
+}
+
+export interface TargetPrototype {
+  id: number;
+  arch: string;
+  boards: Board[];
+}
+
+export enum WidgetKind {
+  U8 = "U8",
+  U16 = "U16",
+  U32 = "U32",
+  U64 = "U64",
+  F32 = "F32",
+  F64 = "F64",
+  String = "String",
+  Selection = "Selection",
+}
+
+export interface ConfigTypeScalar {
+  name: string;
+  widget: {
+    kind: WidgetKind;
+    data: never;
+  };
+}
+
+export interface ConfigTypeSelection {
+  name: string;
+  widget: {
+    kind: WidgetKind.Selection;
+    data: string[];
+  };
+}
+
+export type ConfigType = ConfigTypeSelection | ConfigTypeScalar;
+
+export interface ConfigRequest {
+  id: number;
+  name: string;
+  ty: ConfigType;
+}
+
+export enum MeasurementType {
+  Percentage = "Percentage",
+  FloatCelsius = "FloatCelsius",
+  RawAnalogRead = "RawAnalogRead",
+}
+
+export interface Measurement {
+  name: string;
+  value: string;
+  ty: MeasurementType;
+}
+
+export interface Config {
+  requestId: number;
+  name: string;
+  typeName: string;
+  value: string;
+}
+
+export interface Sensor {
+  id: number;
+  name: string;
+  dependencies: string[];
+  includes: string[];
+  definitions: string[];
+  setups: string[];
+  measurements: Measurement[];
+  configurations: Config[];
+  prototype: SensorPrototype;
+}
+
+export interface SensorPrototype {
+  id: number;
+  name: string;
+  dependencies: string[];
+  includes: string[];
+  definitions: string[];
+  setups: string[];
+  measurements: Measurement[];
+  configuration_requests: ConfigRequest[];
+}
+
 export interface Organization {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
-  description?: string;
+  description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -9,7 +124,7 @@ export interface Organization {
 export interface Collection {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
-  description?: string;
+  description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -17,59 +132,58 @@ export interface Collection {
 export interface Device {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
-  description?: string;
+  description: string | null;
   mac: string;
-  file_hash: string;
+  firmware_id: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface LastUpdate {
   version: string;
-  file_hash: string;
-  created_at: string;
-  updated_at: string;
+  fileHash: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface LastEvent {
-  air_temperature_celsius: number;
-  air_humidity_percentage: number;
-  air_heat_index_celsius: number;
-  soil_resistivity_raw: number;
-  soil_temperature_celsius: number;
-  created_at: string;
-  updated_at: string;
+export interface Event {
+  measurements: unknown;
+  metadatas: Measurement[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DeviceView {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
-  description?: string;
+  description: string | null;
+  target: Target | null;
+  sensors: Sensor[];
   mac: string;
-  file_hash: string;
-  last_update?: LastUpdate;
-  last_event?: LastEvent;
-  created_at: string;
-  updated_at: string;
+  fileHash: string;
+  lastUpdate: LastUpdate | null;
+  lastEvent: Event | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CollectionView {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
-  description?: string;
-  device: Array<Device>;
-  created_at: string;
-  updated_at: string;
+  description: string | null;
+  devices: Device[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface OrganizationView {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
-  description?: string;
+  description: string | null;
   collections: Array<Collection>;
   members: Array<string>; // username
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DeviceLog {
@@ -78,33 +192,8 @@ export interface DeviceLog {
   created_at: string;
 }
 
-export interface Plant {
-  id: string;
-  name: string;
-  description?: string;
-  owner_id: number;
-  created_at: string;
-}
-
-export interface Event {
-  id: number;
-  air_temperature_celsius: number;
-  air_humidity_percentage: number;
-  soil_resistivity_raw: number;
-  soil_temperature_celsius: number;
-  plant_id: number;
-  created_at: string;
-}
-
-export interface Status {
-    plant: Plant;
-    event?: Event;
-    now: number;
-}
-
 export interface DevicePanic {
   id: number;
-  plant_id: number;
   file: string;
   line: number;
   function: string;
@@ -113,39 +202,39 @@ export interface DevicePanic {
   updated_at: string;
 }
 
-export interface EventHistory {
-    events: Event[];
-    now: number;
-}
-
-
 export interface Dataset {
-    label: string;
-    yAxisID?: string;
-    backgroundColor: string;
-    data: number[];
-  }
-  
-export interface Chart {
-    labels: string[];
-    datasets: Dataset[];
+  label: string;
+  yAxisID?: string;
+  backgroundColor: string;
+  data: number[];
 }
 
-export interface YAxes {
-    type: string;
-    id: string;
-    position?: string;
-    ticks: {
-        callback(value: number): string;
-        min: number;
-        max?: number;
-    };
+//export interface Chart {
+//  labels: string[];
+//  datasets: Dataset[];
+//}
+//
+//export interface YAxes {
+//  type: string;
+//  id: string;
+//  position?: string;
+//  ticks: {
+//    callback(value: number): string;
+//    min: number;
+//    max?: number;
+//  };
+//}
+
+export interface Firmware {
+  id: number;
+  //compilation: Compilation;
+  hash: string;
 }
 
-export interface ChartOptions {
-    responsive: boolean;
-    maintainAspectRatio: boolean;
-    scales: {
-        yAxes: YAxes[];
-    };
-}  
+//export interface ChartOptions {
+//  responsive: boolean;
+//  maintainAspectRatio: boolean;
+//  scales: {
+//    yAxes: YAxes[];
+//  };
+//}

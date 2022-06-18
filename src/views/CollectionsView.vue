@@ -4,14 +4,6 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import Collections from '@/components/Collections.vue';
-
-export default defineComponent({
-  name: 'CollectionsView',
-  components: {
-    Collections,
-  },
-});
 </script>

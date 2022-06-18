@@ -4,14 +4,6 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import Plant from '@/components/Plant.vue';
-
-export default defineComponent({
-  name: 'PlantView',
-  components: {
-    Plant,
-  },
-});
 </script>

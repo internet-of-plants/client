@@ -4,14 +4,6 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import Organizations from '@/components/Organizations.vue';
-
-export default defineComponent({
-  name: 'OrganizationsView',
-  components: {
-    Organizations,
-  },
-});
 </script>
