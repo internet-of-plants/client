@@ -1,24 +1,50 @@
 <template>
-  <DeviceMetadata v-if="device" :device="device" />
+  <div class="flex flex-col w-full items-center m-10">
+    <button class="right" @click="editing = !editing">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
+        />
+        <path
+          fill-rule="evenodd"
+          d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </button>
+    <DeviceMetadata
+      v-if="device"
+      :organization-id="parseOrganizationId"
+      :collection-id="parseCollectionId"
+      :editing="editing"
+      :device="device"
+    />
 
-  <Logs v-if="logs" :logs="logs" />
+    <Panics
+      v-if="panics && device"
+      :panics="panics"
+      :organizationId="parseOrganizationId"
+      :collectionId="parseCollectionId"
+      :deviceId="device.id"
+    />
 
-  <Panics
-    v-if="panics && device"
-    :panics="panics"
-    :organizationId="parseOrganizationId"
-    :collectionId="parseCollectionId"
-    :deviceId="device.id"
-  />
+    <Upload
+      v-if="device"
+      :organization-id="parseOrganizationId"
+      :collection-id="parseCollectionId"
+      :device="device"
+      :editing="editing"
+    />
 
-  <Upload
-    v-if="device"
-    :organization-id="parseOrganizationId"
-    :collection-id="parseCollectionId"
-    :device="device"
-  />
+    <Logs v-if="logs" :logs="logs" />
 
-  <EventHistory v-if="events" :history="events" />
+    <EventHistory v-if="events" :history="events" />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -35,6 +61,8 @@ import PanicService from "@/api/panic";
 import LogService from "@/api/log";
 import DeviceService from "@/api/device";
 import EventService from "@/api/event";
+
+const editing = ref(false);
 
 const { organizationId, collectionId, deviceId } = useRoute().params;
 
@@ -66,7 +94,7 @@ onMounted(async () => {
     collectionId,
     deviceId,
   });
-  document.title = `Device ${device.value.name ?? device.value.mac}`;
+  document.title = `${device.value.name ?? device.value.mac}`;
 
   logs.value = await LogService.list({
     organizationId,
@@ -84,7 +112,7 @@ onMounted(async () => {
     organizationId,
     collectionId,
     deviceId,
-    limit: 5000,
+    limit: 500,
   });
 });
 </script>

@@ -1,8 +1,8 @@
 import { SensorPrototype } from "@/models";
 import * as HTTP from "@/http";
 
-async function listForTarget(id: number): Promise<SensorPrototype[]> {
-  return await HTTP.get(`/v1/target/${id}/sensor/prototypes`);
+async function listForTarget(targetId: number): Promise<SensorPrototype[]> {
+  return await HTTP.get("/v1/target/sensor/prototypes", { targetId });
 }
 
 const SensorPrototypeService = {

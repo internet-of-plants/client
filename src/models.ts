@@ -68,17 +68,27 @@ export type ConfigType = ConfigTypeSelection | ConfigTypeScalar;
 export interface ConfigRequest {
   id: number;
   name: string;
+  humanName: string;
   ty: ConfigType;
+}
+
+export enum MeasurementKind {
+  AirTemperature = "AirTemperature",
+  AirHumidity = "AirHumidity",
+  SoilTemperature = "SoilTemperature",
+  SoilMoisture = "SoilMoisture"
 }
 
 export enum MeasurementType {
   Percentage = "Percentage",
   FloatCelsius = "FloatCelsius",
   RawAnalogRead = "RawAnalogRead",
+  Unknown = "Unknown"
 }
 
 export interface Measurement {
   name: string;
+  humanName: string;
   value: string;
   ty: MeasurementType;
 }
@@ -93,11 +103,11 @@ export interface Config {
 export interface Sensor {
   id: number;
   name: string;
+  alias: string;
   dependencies: string[];
   includes: string[];
   definitions: string[];
   setups: string[];
-  measurements: Measurement[];
   configurations: Config[];
   prototype: SensorPrototype;
 }
@@ -111,14 +121,6 @@ export interface SensorPrototype {
   setups: string[];
   measurements: Measurement[];
   configuration_requests: ConfigRequest[];
-}
-
-export interface Organization {
-  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
-  name: string;
-  description: string | null;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface Collection {
@@ -139,13 +141,6 @@ export interface Device {
   updated_at: string;
 }
 
-export interface LastUpdate {
-  version: string;
-  fileHash: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface Event {
   measurements: unknown;
   metadatas: Measurement[];
@@ -161,7 +156,6 @@ export interface DeviceView {
   sensors: Sensor[];
   mac: string;
   fileHash: string;
-  lastUpdate: LastUpdate | null;
   lastEvent: Event | null;
   createdAt: string;
   updatedAt: string;
@@ -176,7 +170,7 @@ export interface CollectionView {
   updatedAt: string;
 }
 
-export interface OrganizationView {
+export interface Organization {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
   description: string | null;
@@ -227,7 +221,6 @@ export interface Dataset {
 
 export interface Firmware {
   id: number;
-  //compilation: Compilation;
   hash: string;
 }
 

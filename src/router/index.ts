@@ -5,11 +5,7 @@ import DevicesView from '@/views/DevicesView.vue';
 import DeviceView from '@/views/DeviceView.vue';
 import LoginView from '@/views/LoginView.vue';
 import SignupView from '@/views/SignupView.vue';
-import CreateSensorView from '@/views/CreateSensorView.vue';
-import CreateCompilerView from '@/views/CreateCompilerView.vue';
-import CompilationsView from '@/views/CompilationsView.vue';
 import SensorPrototypesView from '@/views/SensorPrototypesView.vue';
-import TargetPrototypesView from '@/views/TargetPrototypesView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -67,34 +63,10 @@ const routes: Array<RouteRecordRaw> = [
     component: SignupView,
   },
   {
-    path: '/target/prototypes',
-    name: 'TargetPrototypesView',
-    meta: { title: 'Target Prototypes' },
-    component: TargetPrototypesView,
-  },
-  {
     path: '/sensor/prototypes',
     name: 'SensorPrototypesView',
     meta: { title: 'Sensor Prototypes' },
     component: SensorPrototypesView,
-  },
-  {
-    path: '/sensor/create/:id',
-    name: 'CreateSensorView',
-    meta: { title: 'Create Sensor' },
-    component: CreateSensorView,
-  },
-  {
-    path: '/compiler/create',
-    name: 'CreateCompilerView',
-    meta: { title: 'Create Compiler' },
-    component: CreateCompilerView,
-  },
-  {
-    path: '/compilations',
-    name: 'CompilationsView',
-    meta: { title: 'Compilations' },
-    component: CompilationsView,
   },
 ];
 

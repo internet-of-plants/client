@@ -2,18 +2,15 @@ import type { DevicePanic } from "@/models";
 import * as HTTP from "@/http";
 
 export interface DeviceContext {
-  organizationId: number;
-  collectionId: number;
   deviceId: number;
+  limit?: number;
 }
 
 async function list(
   ctx: DeviceContext,
-  limit = 3
 ): Promise<DevicePanic[]> {
-  return await HTTP.get(
-    `/v1/organization/${ctx.organizationId}/collection/${ctx.collectionId}/device/${ctx.deviceId}/panic/last/${limit}`
-  );
+  ctx.limit = ctx.limit ?? 3;
+  return await HTTP.get("/v1/device/panics", ctx);
 }
 
 export interface PanicContext extends DeviceContext {
@@ -21,9 +18,7 @@ export interface PanicContext extends DeviceContext {
 }
 
 async function solve(ctx: PanicContext) {
-  await HTTP.post(
-    `/v1/organization/${ctx.organizationId}/collection/${ctx.collectionId}/device/${ctx.deviceId}/panic/solve/${ctx.panicId}`
-  );
+  await HTTP.post("/v1/device/panic/solve", ctx);
 }
 
 const PanicService = {

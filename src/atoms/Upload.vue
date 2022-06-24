@@ -1,109 +1,165 @@
 <template>
-  <!--
-  <div v-if="!props.device.compiler">
-    <h3>Upload new firmware</h3>
-    <form class="upload" ref="form" v-on:submit.prevent="useFirmware">
-      <div>
-        <label for="version">Firmware:</label>
-        <select name="firmware" v-for="f in firmwares" :key="f.id">
-          <option value="f.id">
-            {{ f.compilation.compiler.targetArch }} -
-            {{ f.compilation.compiler.sensorNames.join(", ") }}
-          </option>
-        </select>
-      </div>
-      <button type="submit">Use this firmware</button>
-    </form>
-  </div>
-  -->
-
   <div>
     <h4 v-if="!props.device.compiler">Generate new firmware</h4>
     <h3 v-if="!props.device.compiler">
       Device not configured, add sensors and a target to be up to date
     </h3>
-    <div>
-      <strong>Target:</strong>
+    <template v-if="targets">
+      <strong>Target: </strong>
       <select
+        v-if="props.editing"
         v-model="target"
-        @change="
-          fetchSensorPrototypes($event.target.value);
-          newSensors.value = [ref(undefined)];
-          configRequests.value = {};
-        "
+        @change="updateTarget($event.target.value)"
       >
         <template v-if="targets">
           <option value=""></option>
           <option v-for="target in targets" :key="target.id" :value="target.id">
-            {{ target.arch }} {{ target.board ? "-" + target.board : "" }}
+            {{ targetName(target) }}
           </option>
         </template>
       </select>
-    </div>
+      <span v-else>
+        {{ targetName(targets?.find((t) => t.id === target)) }}
+      </span>
+    </template>
 
     <div>
       <strong>Sensors:</strong>
-      <div v-for="newSensor in newSensors" :key="newSensor.value">
-        <select
-          v-model="newSensor.value"
-          @change="newSensors.push(ref(undefined))"
-        >
-          <template v-if="sensorPrototypes && target">
-            <option value=""></option>
-            <option
-              v-for="prototype in sensorPrototypes"
-              :key="prototype.id"
-              :value="prototype.id"
-            >
-              {{ prototype.name }}
-            </option>
-          </template>
-        </select>
-
-        <template v-if="sensorPrototype(newSensor.value)">
-          <div
-            v-for="request in sensorPrototype(newSensor.value)
-              .configuration_requests"
-            :key="request.id"
+      <div class="flex flex-row">
+        <div class="flex flex-col">
+          <span
+            v-for="[index, newSensor] in alignedNewSensors"
+            :key="index"
+            class="mb-2"
           >
-            <label>{{ request.name }}: {{ request.ty.name }}</label>
-            <template
-              v-if="
-                [
-                  WidgetKind.U8,
-                  WidgetKind.U16,
-                  WidgetKind.U32,
-                  WidgetKind.U64,
-                  WidgetKind.F32,
-                  WidgetKind.F64,
-                ].includes(request.ty.widget.kind)
-              "
+            <select
+              v-if="editing && newSensor.prototypeId !== null"
+              v-model="newSensor.prototypeId"
+              @change="addSensor()"
+              class="mr-5"
             >
-              <input v-model="configRequests[request.id]" />
-            </template>
-            <template v-else-if="request.ty.widget.kind === WidgetKind.String">
-              <input v-model="configRequests[request.id]" />
-            </template>
-            <template
-              v-else-if="request.ty.widget.kind === WidgetKind.Selection"
-            >
-              <select v-model="configRequests[request.id]">
+              <template v-if="sensorPrototypes && target">
                 <option value=""></option>
                 <option
-                  v-for="opt in request.ty.widget.data"
-                  :key="opt"
-                  :value="opt"
+                  v-for="prototype in sensorPrototypes"
+                  :key="prototype.id"
+                  :value="prototype.id"
                 >
-                  {{ opt }}
+                  {{ prototype.name }}
                 </option>
-              </select>
-            </template>
-          </div>
-        </template>
+              </template>
+            </select>
+            <span
+              v-else-if="!editing && newSensor.prototypeId !== undefined"
+              class="mr-5"
+              >{{ sensorPrototype(newSensor.prototypeId)?.name }}</span
+            >
+          </span>
+        </div>
+
+        <div class="flex flex-col">
+          <span
+            v-for="[index, newSensor] in alignedNewSensors"
+            :key="index"
+            class="mb-2"
+          >
+            <input
+              v-if="editing && newSensor.alias !== null"
+              v-model="newSensor.alias"
+              @blur="
+                saveAlias(
+                  newSensor.alias,
+                  newSensor.sensorId,
+                  props.device.compiler?.id
+                )
+              "
+              class="mr-5"
+            />
+            <span
+              v-else-if="!editing && newSensor.alias !== undefined"
+              class="mr-5"
+            >
+              {{ newSensor.alias }}
+            </span>
+          </span>
+        </div>
+
+        <span class="flex flex-col">
+          <label
+            v-for="[index, request] in alignedRequests"
+            :key="`${index}-${request.id}`"
+            class="flex flex-row mr-2 mb-2"
+          >
+            {{ request.humanName }}
+          </label>
+        </span>
+
+        <span class="flex flex-col">
+          <span
+            v-for="[index, request] in alignedRequests"
+            :key="`${index}-${request.id}`"
+            class="mb-2"
+          >
+            <span v-if="editing">
+              <template
+                v-if="
+                  [
+                    WidgetKind.U8,
+                    WidgetKind.U16,
+                    WidgetKind.U32,
+                    WidgetKind.U64,
+                    WidgetKind.F32,
+                    WidgetKind.F64,
+                  ].includes(request.ty.widget.kind)
+                "
+              >
+                <input v-model="configRequests[`${index}-${request.id}`]" />
+              </template>
+              <template
+                v-else-if="request.ty.widget.kind === WidgetKind.String"
+              >
+                <input v-model="configRequests[`${index}-${request.id}`]" />
+              </template>
+              <template
+                v-else-if="request.ty.widget.kind === WidgetKind.Selection"
+              >
+                <select v-model="configRequests[`${index}-${request.id}`]">
+                  <option value=""></option>
+                  <option
+                    v-for="opt in request.ty.widget.data"
+                    :key="opt"
+                    :value="opt"
+                  >
+                    {{ opt }}
+                  </option>
+                </select>
+              </template>
+            </span>
+            <span v-else>{{ configRequests[`${index}-${request.id}`] }}</span>
+          </span>
+        </span>
       </div>
 
-      <button @click="create()">Set Compiler</button>
+      <button v-if="editing" @click="create()">Set Compiler</button>
     </div>
+  </div>
+
+  <div class="mb-3">
+    <p
+      v-if="
+        props.device.firmware.hash ===
+        props.device.compiler?.latestFirmware.hash
+      "
+      :title="`Firmware MD5: ${props.device.firmware.hash}`"
+    >
+      Device Up to Date
+    </p>
+    <p
+      v-else
+      :title="`Current Firmware MD5: ${props.device.firmware.hash}\nUpdate's Firmware MD5: ${props.device.compiler?.latestFirmware.hash}`"
+    >
+      Update Available
+    </p>
   </div>
   <!--
   <form class="upload" ref="form" v-on:submit.prevent="uploadBinary">
@@ -121,49 +177,108 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { DeviceView, WidgetKind } from "@/models";
 //import UploadService from "@/api/upload";
-import FirmwareService from "@/api/firmware";
 import TargetService from "@/api/target";
 import CompilerService from "@/api/compiler";
 import SensorPrototypeService from "@/api/sensor_prototype";
+import SensorService from "@/api/sensor";
 
 const props = defineProps<{
   organizationId: number;
   collectionId: number;
   device: DeviceView;
+  editing: boolean;
 }>();
 
 //const form = ref<HTMLFormElement | null>(null);
 
-const firmwares = ref(undefined);
 const targets = ref(undefined);
 const sensorPrototypes = ref(undefined);
 
 const target = ref(props.device.compiler?.target?.id);
 const propSensorIds =
-  props.device.compiler?.sensors?.map((s) => ref(s.prototype.id)) ?? [];
-propSensorIds.push(ref(undefined));
+  props.device.compiler?.sensors?.map((s) => ({
+    prototypeId: ref(s.prototype.id),
+    alias: ref(s.alias),
+    sensorId: s.id,
+  })) ?? [];
+propSensorIds.push({
+  prototypeId: ref(undefined),
+  alias: ref(undefined),
+  sensorId: undefined,
+});
 
 const newSensors = ref(propSensorIds);
 const configRequests = ref(
-  props.device.compiler?.sensors
-    ?.flatMap((s) => s.configurations)
-    ?.reduce((acc, val) => ({ ...acc, [val.requestId]: ref(val.value) }), {}) ??
-    {}
+  Object.entries(props.device.compiler?.sensors ?? [])
+    .flatMap(([index, s]) => s.configurations.map((c) => [index, c]))
+    .reduce(
+      (acc, [index, val]) => ({
+        ...acc,
+        [`${index}-${val.requestId}`]: ref(val.value),
+      }),
+      {}
+    )
 );
 const sensorPrototype = (id: number) => {
   return sensorPrototypes.value?.find((s) => s.id === id);
 };
 
-onMounted(async () => {
-  firmwares.value = await FirmwareService.list({
-    organizationId: props.organizationId,
-    collectionId: props.collectionId,
-    deviceId: props.device.id,
+const saveAlias = async (
+  alias: string,
+  sensorId?: number,
+  compilerId?: number
+) => {
+  if (!sensorId || !compilerId) return;
+  if (
+    props.device.compiler?.sensors?.find((s) => s.id === sensorId)?.alias ===
+    alias
+  )
+    return;
+  await SensorService.setAlias({
+    sensorId,
+    compilerId,
+    alias,
   });
+};
 
+const alignedNewSensors = computed(() => {
+  return Object.entries(newSensors.value).flatMap(([index, newSensor]) => {
+    const requests =
+      sensorPrototype(newSensor.prototypeId)?.configuration_requests.map(
+        () => ({ prototypeId: null, alias: null, sensorId: undefined })
+      ) ?? [];
+    requests[0] = newSensor;
+    return requests.map((request) => [index, request]);
+  });
+});
+
+const alignedRequests = computed(() => {
+  return Object.entries(newSensors.value).flatMap(([index, newSensor]) => {
+    const requests =
+      sensorPrototype(newSensor.prototypeId)?.configuration_requests ?? [];
+    return requests.map((request) => [index, request]);
+  });
+});
+
+const addSensor = () => {
+  newSensors.value = newSensors.value.filter(
+    (s) => s.prototypeId !== undefined
+  );
+  newSensors.value.push({
+    prototypeId: ref(undefined),
+    alias: ref(undefined),
+    sensorId: undefined,
+  });
+};
+
+const targetName = (target) => {
+  return `${target.arch}${target.board ? "-" + target.board : ""}`;
+};
+
+onMounted(async () => {
   targets.value = await TargetService.list();
 });
 
@@ -175,26 +290,27 @@ const create = async () => {
     sensors: [],
   };
 
-  for (const newSensor of newSensors.value) {
-    if (newSensor.value === undefined || newSensor.value === "") continue;
+  for (const [index, newSensor] of Object.entries(newSensors.value)) {
+    if (newSensor.prototypeId === undefined) continue;
 
-    if (!sensorPrototype(newSensor.value)) {
-      throw new Error(`invalid sensor configured: ${newSensor.value}`);
+    if (!sensorPrototype(newSensor.prototypeId)) {
+      throw new Error(`invalid sensor configured: ${newSensor.prototypeId}`);
     }
 
     const configs = [];
-    for (const request of sensorPrototype(newSensor.value)
+    for (const request of sensorPrototype(newSensor.prototypeId)
       .configuration_requests) {
-      if (!configRequests.value[request.id]) {
+      if (!configRequests.value[`${index}-${request.id}`]) {
         throw new Error(`missing config for ${request.name}`);
       }
       configs.push({
         requestId: request.id,
-        value: configRequests.value[request.id],
+        value: configRequests.value[`${index}-${request.id}`],
       });
     }
     newCompiler.sensors.push({
-      prototypeId: newSensor.value,
+      prototypeId: newSensor.prototypeId,
+      alias: newSensor.alias,
       configs,
     });
   }
@@ -205,15 +321,17 @@ const create = async () => {
 const fetchSensorPrototypes = async (targetId: number) => {
   sensorPrototypes.value = undefined;
   const s = await SensorPrototypeService.listForTarget(targetId);
-  if (configRequests.value === undefined) {
-    configRequests.value = s
-      .flatMap((p) => p.configuration_requests)
-      .map((r) => r.id)
-      .reduce((acc, val) => ({ ...acc, [val]: ref(undefined) }), {});
-  }
   sensorPrototypes.value = s;
 };
 if (target.value) fetchSensorPrototypes(target.value);
+
+const updateTarget = (targetId: number) => {
+  fetchSensorPrototypes(targetId);
+  newSensors.value = [
+    { prototypeId: ref(undefined), alias: ref(undefined), sensorId: undefined },
+  ];
+  configRequests.value = {};
+};
 
 /*
 const useFirmware = async () => {

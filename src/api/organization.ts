@@ -6,7 +6,7 @@ async function list(): Promise<Organization[]> {
 }
 
 async function find(organizationId: number): Promise<OrganizationView> {
-  return await HTTP.get(`/v1/organization/${organizationId}`);
+  return await HTTP.get("/v1/organization",{organizationId});
 }
 
 const OrganizationService = {

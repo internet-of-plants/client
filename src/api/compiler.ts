@@ -7,6 +7,7 @@ export interface NewConfig {
 
 export interface NewSensor {
   prototypeId: number;
+  alias: string;
   configs: NewConfig[];
 }
 

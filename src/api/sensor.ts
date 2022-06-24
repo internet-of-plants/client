@@ -1,18 +1,16 @@
-import { SensorPrototype } from "@/models";
 import * as HTTP from "@/http";
 
-export interface SensorPrototypeContext {
-  organizationId: number;
-  collectionId: number;
-  deviceId: number;
+interface SetAliasContext {
+  sensorId: number;
+  compilerId: number;
+  alias: string;
 }
 
-async function listPrototype(ctx: SensorContext): Promise<Sensor[]> {
-  return await HTTP.get(
-    `/v1/organization/${ctx.organizationId}/collection/${ctx.collectionId}/device/${ctx.deviceId}/firmwares`
-  );
+async function setAlias(ctx: SetAliasContext): Promise<void> {
+  await HTTP.post("/v1/sensor/set/alias", ctx);
 }
+
 const SensorService = {
-  list,
+  setAlias
 };
 export default SensorService;

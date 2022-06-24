@@ -2,17 +2,23 @@ import type { DeviceView } from "@/models";
 import * as HTTP from "@/http";
 
 export interface DeviceContext {
-  organizationId: number;
-  collectionId: number;
   deviceId: number;
 }
 
 async function find(ctx: DeviceContext): Promise<DeviceView> {
-  return await HTTP.get(
-  `/v1/organization/${ctx.organizationId}/collection/${ctx.collectionId}/device/${ctx.deviceId}`);
+  return await HTTP.get("/v1/device", ctx);
+}
+
+export interface NameUpdateContext extends DeviceContext {
+  name: string;
+}
+
+async function setName(ctx: NameUpdateContext): Promise<void> {
+  await HTTP.post("/v1/device/name", ctx);
 }
 
 const DeviceService = {
-  find
+  find,
+  setName,
 };
 export default DeviceService;
