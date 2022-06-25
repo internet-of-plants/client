@@ -50,7 +50,7 @@
               </template>
             </select>
             <span
-              v-else-if="!editing && newSensor.prototypeId !== undefined"
+              v-else-if="newSensor.prototypeId !== undefined"
               class="mr-5"
               >{{ sensorPrototype(newSensor.prototypeId)?.name }}</span
             >
@@ -70,15 +70,11 @@
                 saveAlias(
                   newSensor.alias,
                   newSensor.sensorId,
-                  props.device.compiler?.id
                 )
               "
               class="mr-5"
             />
-            <span
-              v-else-if="!editing && newSensor.alias !== undefined"
-              class="mr-5"
-            >
+            <span v-else-if="newSensor.alias !== undefined" class="mr-5">
               {{ newSensor.alias }}
             </span>
           </span>
@@ -192,8 +188,6 @@ const props = defineProps<{
   editing: boolean;
 }>();
 
-//const form = ref<HTMLFormElement | null>(null);
-
 const targets = ref(undefined);
 const sensorPrototypes = ref(undefined);
 
@@ -229,9 +223,8 @@ const sensorPrototype = (id: number) => {
 const saveAlias = async (
   alias: string,
   sensorId?: number,
-  compilerId?: number
 ) => {
-  if (!sensorId || !compilerId) return;
+  if (!sensorId) return;
   if (
     props.device.compiler?.sensors?.find((s) => s.id === sensorId)?.alias ===
     alias
@@ -239,7 +232,7 @@ const saveAlias = async (
     return;
   await SensorService.setAlias({
     sensorId,
-    compilerId,
+    deviceId: props.device.id,
     alias,
   });
 };
@@ -332,30 +325,4 @@ const updateTarget = (targetId: number) => {
   ];
   configRequests.value = {};
 };
-
-/*
-const useFirmware = async () => {
-  if (!form?.value) throw new Error("Form is null");
-  await UploadService.useFirmware({
-    organizationId: props.organizationId,
-    collectionId: props.collectionId,
-    deviceId: props.device.id,
-    form: new FormData(form.value),
-  });
-
-  router.push({ path: "/" });
-};
-
-const uploadBinary = async () => {
-  if (!form?.value) throw new Error("Form is null");
-  await UploadService.create({
-    organizationId: props.organizationId,
-    collectionId: props.collectionId,
-    deviceId: props.device.id,
-    form: new FormData(form.value),
-  });
-
-  router.push({ path: "/" });
-};
-*/
 </script>

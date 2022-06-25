@@ -80,9 +80,6 @@ try {
   router.push({ path: `/organization/${organizationId}` });
 }
 
-//const history = ref<EventHistory | null>(null);
-//history.value = await HTTP.get(`/v1/device/history?id=${deviceId}&since_secs_ago=${30 * 60}`);
-
 const device = ref(undefined);
 const logs = ref(undefined);
 const panics = ref(undefined);

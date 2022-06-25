@@ -2,7 +2,7 @@ import * as HTTP from "@/http";
 
 interface SetAliasContext {
   sensorId: number;
-  compilerId: number;
+  deviceId: number;
   alias: string;
 }
 
