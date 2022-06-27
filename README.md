@@ -6,6 +6,27 @@ Web client used to monitor and manage iot devices. Integrates with [internet-of-
 
 Generates measurements charts, displays last device logs and panic events. Helps you to also keep track of and control your devices at scale. Providing updates, enhancing measurements with the available metadata. Using human input paired with a constant timeseries feed of the measurements collected by the device.
 
+## Features
+
+### Unauthenticated routes
+
+- `/login` signs in as specified user for web access
+- `/signup` signs up as specified user for web access and signs them in
+
+### Authenticated routes
+
+- `/` list organizations
+- `/organization/:orgId` list collections of said organization
+- `/organization/:orgId/collection/:colId` list devices of said collection
+- `/organization/:orgId/collection/:colId/device/:devId` detail said device
+    - Displays device's name, description and last measurements
+    - Can edit device's name
+    - Display last panic events registered by the device
+    - Display last log events registered by the device
+    - Plots chart with the last devices measurements
+    - Allows configuring the target and sensors (with specified ports + factory settings) for the device
+        - This triggers automatic OTA updates, compiled by the backend service
+
 ## Signup
 
 To signup go to `/signup`.

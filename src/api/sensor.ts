@@ -7,7 +7,7 @@ interface SetAliasContext {
 }
 
 async function setAlias(ctx: SetAliasContext): Promise<void> {
-  await HTTP.post("/v1/sensor/set/alias", ctx);
+  await HTTP.post("/v1/sensor/alias", ctx);
 }
 
 const SensorService = {

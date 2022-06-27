@@ -9,24 +9,18 @@ import SignupView from '@/views/SignupView.vue';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'HomeView',
+    name: 'OrganizationsView',
     meta: { title: 'Organizations' },
     component: OrganizationsView,
   },
   {
     path: '/organization/:organizationId',
-    name: 'OrganizationView',
+    name: 'CollectionsView',
     meta: { title: 'Collections' },
     component: CollectionsView,
   },
   {
     path: '/organization/:organizationId/collection/:collectionId',
-    name: 'CollectionView',
-    meta: { title: 'Devices' },
-    component: DevicesView,
-  },
-  {
-    path: '/organization/:organizationId/collection/:collectionId/device',
     name: 'DevicesView',
     meta: { title: 'Devices' },
     component: DevicesView,
