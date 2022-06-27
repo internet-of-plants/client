@@ -1,12 +1,10 @@
-# Internet of Plants Monitor Client
+# Internet of Plants - User's Web Interface
 
 **Live at:** [`https://internet-of-plants.github.io/`](https://internet-of-plants.github.io/)
 
-This is the client that is used to monitor (keep track / order around) the iot devices. It is supposed to generate useful graphics and allows you to also keep track at scale of your devices. The idea is to utilize human input together with a bunch of data to better manage the devices.
+Web client used to monitor and manage iot devices. Integrates with [internet-of-plants/server](https://github.com/internet-of-plants/server).
 
-You can't automate what you don't personally understand, or without a specialist available. This is here to provide all the tools to better automate the process after understanding it.
-
-It's not there yet.
+Generates measurements charts, displays last device logs and panic events. Helps you to also keep track of and control your devices at scale. Providing updates, enhancing measurements with the available metadata. Using human input paired with a constant timeseries feed of the measurements collected by the device.
 
 ## Signup
 
@@ -42,7 +40,7 @@ Then you have to git clone the repository quoted above, in the parent folder of 
 ```
 cd .. # Assuming you are in this project's folder
 git clone git@github.com:internet-of-plants/internet-of-plants.github.io.git
-mv monitor static
+mv internet-of-plants.github.io static
 ```
 
 Now to deploy you can just run:
