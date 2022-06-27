@@ -46,3 +46,7 @@ mv internet-of-plants.github.io static
 Now to deploy you can just run:
 
 `./deploy.sh`
+
+## License
+
+[GNU Affero General Public License version 3 or later (AGPL-3.0+)](https://github.com/internet-of-plants/client/blob/main/LICENSE.md)

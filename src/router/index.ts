@@ -5,7 +5,6 @@ import DevicesView from '@/views/DevicesView.vue';
 import DeviceView from '@/views/DeviceView.vue';
 import LoginView from '@/views/LoginView.vue';
 import SignupView from '@/views/SignupView.vue';
-import SensorPrototypesView from '@/views/SensorPrototypesView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -15,20 +14,8 @@ const routes: Array<RouteRecordRaw> = [
     component: OrganizationsView,
   },
   {
-    path: '/organization',
-    name: 'OrganizationsView',
-    meta: { title: 'Organizations' },
-    component: OrganizationsView,
-  },
-  {
     path: '/organization/:organizationId',
     name: 'OrganizationView',
-    meta: { title: 'Collections' },
-    component: CollectionsView,
-  },
-  {
-    path: '/organization/:organizationId/collection',
-    name: 'CollectionsView',
     meta: { title: 'Collections' },
     component: CollectionsView,
   },
@@ -61,12 +48,6 @@ const routes: Array<RouteRecordRaw> = [
     name: 'SignupView',
     meta: { title: 'Signup' },
     component: SignupView,
-  },
-  {
-    path: '/sensor/prototypes',
-    name: 'SensorPrototypesView',
-    meta: { title: 'Sensor Prototypes' },
-    component: SensorPrototypesView,
   },
 ];
 
