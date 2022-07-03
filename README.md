@@ -1,6 +1,6 @@
 # Internet of Plants - User's Web Interface
 
-**Live at:** [`https://internet-of-plants.github.io/`](https://internet-of-plants.github.io/)
+**Live at:** [`https://web.internet-of-plants.org/`](https://web.internet-of-plants.org/)
 
 Web client used to monitor and manage iot devices. Integrates with [internet-of-plants/server](https://github.com/internet-of-plants/server).
 
@@ -52,7 +52,7 @@ yarn lint
 ```
 ## Deploy
 
-Since this project is a simple static folder (when compiled), we use github pages. At [`https://github.com/internet-of-plants/internet-of-plants.github.io`](https://github.com/internet-of-plants/internet-of-plants.github.io).
+Since this project is a simple static folder (when compiled), we use github pages. At [`https://github.com/internet-of-plants/web.internet-of-plants.org`](https://github.com/internet-of-plants/web.internet-of-plants.org).
 
 First you need writing permissions to the repository quoted above.
 
@@ -60,8 +60,8 @@ Then you have to git clone the repository quoted above, in the parent folder of 
 
 ```
 cd .. # Assuming you are in this project's folder
-git clone git@github.com:internet-of-plants/internet-of-plants.github.io.git
-mv internet-of-plants.github.io static
+git clone git@github.com:internet-of-plants/web.internet-of-plants.org.git
+mv web.internet-of-plants.org static
 ```
 
 Now to deploy you can just run:
