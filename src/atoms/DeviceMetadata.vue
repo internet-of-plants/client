@@ -63,23 +63,6 @@
             <Time :moment="props.device.lastEvent.createdAt" />
           </span>
         </span>
-        <!--
-          {{ props.device.lastEvent.air_temperature_celsius }}ºC
-        </p>
-        <p>
-          <b>Air humidity:</b>
-          {{ props.device.lastEvent.air_humidity_percentage }}%
-        </p>
-        <p>
-          <b>Soil temperature:</b>
-          {{ props.device.lastEvent.soil_temperature_celsius }}ºC
-        </p>
-        <p>
-          <b>Soil resistivity:</b>
-          {{ props.device.lastEvent.soil_resistivity_raw }} raw
-          <small>(0-1200)</small>
-        </p>
-        -->
       </div>
     </div>
   </div>
@@ -113,18 +96,18 @@ const saveName = async () => {
 };
 
 const humanName = (name: string) => {
-  const metadata = props.device.lastEvent.metadatas.find(
+  const metadata = (props.device.lastEvent?.metadatas ?? []).find(
     (m) => m.name === name
   );
   return metadata?.humanName ?? name;
 };
 
 const metadata = (name: string) => {
-  return props.device.lastEvent.metadatas.find((m) => m.name === name);
+  return (props.device.lastEvent?.metadatas ?? []).find((m) => m.name === name);
 };
 
 const unit = (name: string) => {
-  const metadata = props.device.lastEvent.metadatas.find(
+  const metadata = (props.device.lastEvent?.metadatas ?? []).find(
     (m) => m.name === name
   );
   if (!metadata) return "";

@@ -18,8 +18,8 @@
           </option>
         </template>
       </select>
-      <span v-else>
-        {{ targetName(targets?.find((t) => t.id === target)) }}
+      <span v-else-if="target">
+        {{ targetName(targets.find((t) => t.id === target)) }}
       </span>
     </template>
 
@@ -35,7 +35,12 @@
             <select
               v-if="editing && newSensor.prototypeId !== null"
               v-model="newSensor.prototypeId"
-              @change="addSensor()"
+              @change="
+                newSensor.alias = sensorPrototypes.find(
+                  (s) => s.id == $event.target.value
+                )?.name;
+                addSensor(newSensor, $event.target.value);
+              "
               class="mr-5"
             >
               <template v-if="sensorPrototypes && target">
@@ -66,12 +71,7 @@
             <input
               v-if="editing && newSensor.alias !== null"
               v-model="newSensor.alias"
-              @blur="
-                saveAlias(
-                  newSensor.alias,
-                  newSensor.sensorId,
-                )
-              "
+              @blur="saveAlias(newSensor.alias, newSensor.sensorId)"
               class="mr-5"
             />
             <span v-else-if="newSensor.alias !== undefined" class="mr-5">
@@ -192,6 +192,7 @@ const targets = ref(undefined);
 const sensorPrototypes = ref(undefined);
 
 const target = ref(props.device.compiler?.target?.id);
+
 const propSensorIds =
   props.device.compiler?.sensors?.map((s) => ({
     prototypeId: ref(s.prototype.id),
@@ -220,10 +221,7 @@ const sensorPrototype = (id: number) => {
   return sensorPrototypes.value?.find((s) => s.id === id);
 };
 
-const saveAlias = async (
-  alias: string,
-  sensorId?: number,
-) => {
+const saveAlias = async (alias: string, sensorId?: number) => {
   if (!sensorId) return;
   if (
     props.device.compiler?.sensors?.find((s) => s.id === sensorId)?.alias ===
@@ -268,7 +266,10 @@ const addSensor = () => {
 };
 
 const targetName = (target) => {
-  return `${target.arch}${target.board ? "-" + target.board : ""}`;
+  if (!target) return "";
+  return `${target.arch}${target.board ? "-" + target.board : ""}${
+    target.name ? "-" + target.name : ""
+  }`;
 };
 
 onMounted(async () => {

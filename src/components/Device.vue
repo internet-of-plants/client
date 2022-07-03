@@ -17,6 +17,7 @@
         />
       </svg>
     </button>
+    
     <DeviceMetadata
       v-if="device"
       :organization-id="parseOrganizationId"
