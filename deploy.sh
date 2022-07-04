@@ -14,6 +14,7 @@ cp $SCRIPTPATH/LICENSE.md $SCRIPTPATH/dist/
 mkdir -p $SCRIPTPATH/../web.internet-of-plants.org
 rm $SCRIPTPATH/../web.internet-of-plants.org/** -r
 cp $SCRIPTPATH/dist/** $SCRIPTPATH/../web.internet-of-plants.org/ -r
+echo "web.internet-of-plants.org" > $SCRIPTPATH/../web.internet-of-plants.org/CNAME
 
 cd $SCRIPTPATH/../web.internet-of-plants.org
   git add -A
