@@ -17,7 +17,7 @@
         />
       </svg>
     </button>
-    
+
     <DeviceMetadata
       v-if="device"
       :organization-id="parseOrganizationId"
@@ -40,11 +40,17 @@
       :collection-id="parseCollectionId"
       :device="device"
       :editing="editing"
+      @refresh="load"
     />
 
     <Logs v-if="logs" :logs="logs" />
 
-    <EventHistory v-if="events" :history="events" />
+    <EventHistory
+      v-if="events && device"
+      :device="device"
+      :history="events"
+      :show-stale="(device.compiler?.sensors?.length ?? 0) == 0"
+    />
   </div>
 </template>
 
@@ -86,13 +92,17 @@ const logs = ref(undefined);
 const panics = ref(undefined);
 const events = ref(undefined);
 
-onMounted(async () => {
+const load = async () => {
   device.value = await DeviceService.find({
     organizationId,
     collectionId,
     deviceId,
   });
   document.title = `${device.value.name ?? device.value.mac}`;
+};
+
+onMounted(async () => {
+  await load();
 
   logs.value = await LogService.list({
     organizationId,

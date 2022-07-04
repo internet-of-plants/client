@@ -71,13 +71,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import Time from "@/atoms/Time.vue";
-import { DeviceView, MeasurementType, MeasurementKind } from "@/models";
+import { Device, MeasurementType, MeasurementKind } from "@/models";
 import DeviceService from "@/api/device";
 
 const props = defineProps<{
   organizationId: number;
   collectionId: number;
-  device: DeviceView;
+  device: Device;
   editing: boolean;
 }>();
 
@@ -95,11 +95,20 @@ const saveName = async () => {
   });
 };
 
+const alias = (name: string): string | undefined => {
+  return props.device.compiler?.sensors?.find((s) =>
+    s.measurements.find((m) => m.name === name)
+  )?.alias;
+};
+
 const humanName = (name: string) => {
   const metadata = (props.device.lastEvent?.metadatas ?? []).find(
     (m) => m.name === name
   );
-  return metadata?.humanName ?? name;
+  const humanName = metadata?.humanName ?? name;
+
+  const sensorAlias = alias(metadata.name);
+  return sensorAlias ? `${sensorAlias} - ${humanName}` : humanName;
 };
 
 const metadata = (name: string) => {

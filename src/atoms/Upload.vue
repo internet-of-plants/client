@@ -30,10 +30,31 @@
           <span
             v-for="[index, newSensor] in alignedNewSensors"
             :key="index"
+            @click.capture="
+              if (!(props.editing && newSensor.color !== null)) {
+                $event.preventDefault();
+                $event.stopPropagation();
+              }
+            "
+            :class="[newSensor.color ? undefined : 'opacity-0']"
+            class="mb-2"
+          >
+            <ColorPicker
+              v-model:pure-color="newSensor.color"
+              @update:pure-color="saveColor($event, newSensor.sensorId)"
+              class="mr-5"
+            />
+          </span>
+        </div>
+
+        <div class="flex flex-col">
+          <span
+            v-for="[index, newSensor] in alignedNewSensors"
+            :key="index"
             class="mb-2"
           >
             <select
-              v-if="editing && newSensor.prototypeId !== null"
+              v-if="props.editing && newSensor.prototypeId !== null"
               v-model="newSensor.prototypeId"
               @change="
                 newSensor.alias = sensorPrototypes.find(
@@ -69,7 +90,7 @@
             class="mb-2"
           >
             <input
-              v-if="editing && newSensor.alias !== null"
+              v-if="props.editing && newSensor.alias !== null"
               v-model="newSensor.alias"
               @blur="saveAlias(newSensor.alias, newSensor.sensorId)"
               class="mr-5"
@@ -96,7 +117,7 @@
             :key="`${index}-${request.id}`"
             class="mb-2"
           >
-            <span v-if="editing">
+            <span v-if="props.editing">
               <template
                 v-if="
                   [
@@ -136,7 +157,7 @@
         </span>
       </div>
 
-      <button v-if="editing" @click="create()">Set Compiler</button>
+      <button v-if="props.editing" @click="create()">Set Compiler</button>
     </div>
   </div>
 
@@ -174,17 +195,19 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue";
-import { DeviceView, WidgetKind } from "@/models";
+import { Device, WidgetKind } from "@/models";
 //import UploadService from "@/api/upload";
 import TargetService from "@/api/target";
 import CompilerService from "@/api/compiler";
 import SensorPrototypeService from "@/api/sensor_prototype";
 import SensorService from "@/api/sensor";
+import { ColorPicker } from "vue3-colorpicker";
+import "vue3-colorpicker/style.css";
 
 const props = defineProps<{
   organizationId: number;
   collectionId: number;
-  device: DeviceView;
+  device: Device;
   editing: boolean;
 }>();
 
@@ -197,11 +220,13 @@ const propSensorIds =
   props.device.compiler?.sensors?.map((s) => ({
     prototypeId: ref(s.prototype.id),
     alias: ref(s.alias),
+    color: ref(s.color),
     sensorId: s.id,
   })) ?? [];
 propSensorIds.push({
   prototypeId: ref(undefined),
   alias: ref(undefined),
+  color: null,
   sensorId: undefined,
 });
 
@@ -221,26 +246,53 @@ const sensorPrototype = (id: number) => {
   return sensorPrototypes.value?.find((s) => s.id === id);
 };
 
+const emit = defineEmits(["refresh"]);
+
+const saveColor = async (color: string | null, sensorId?: number) => {
+  if (!color || !sensorId) return;
+  if (
+    props.device.compiler?.sensors?.find((s) => s.id === sensorId)?.color ===
+    color
+  ) {
+    return;
+  }
+
+  await SensorService.setColor({
+    sensorId,
+    deviceId: props.device.id,
+    color,
+  });
+
+  emit("refresh");
+};
+
 const saveAlias = async (alias: string, sensorId?: number) => {
   if (!sensorId) return;
   if (
     props.device.compiler?.sensors?.find((s) => s.id === sensorId)?.alias ===
     alias
-  )
+  ) {
     return;
+  }
+
   await SensorService.setAlias({
     sensorId,
     deviceId: props.device.id,
     alias,
   });
+
+  emit("refresh");
 };
 
 const alignedNewSensors = computed(() => {
   return Object.entries(newSensors.value).flatMap(([index, newSensor]) => {
     const requests =
-      sensorPrototype(newSensor.prototypeId)?.configuration_requests.map(
-        () => ({ prototypeId: null, alias: null, sensorId: undefined })
-      ) ?? [];
+      sensorPrototype(newSensor.prototypeId)?.configurationRequests.map(() => ({
+        prototypeId: null,
+        alias: null,
+        color: null,
+        sensorId: undefined,
+      })) ?? [];
     requests[0] = newSensor;
     return requests.map((request) => [index, request]);
   });
@@ -249,7 +301,7 @@ const alignedNewSensors = computed(() => {
 const alignedRequests = computed(() => {
   return Object.entries(newSensors.value).flatMap(([index, newSensor]) => {
     const requests =
-      sensorPrototype(newSensor.prototypeId)?.configuration_requests ?? [];
+      sensorPrototype(newSensor.prototypeId)?.configurationRequests ?? [];
     return requests.map((request) => [index, request]);
   });
 });
@@ -261,6 +313,7 @@ const addSensor = () => {
   newSensors.value.push({
     prototypeId: ref(undefined),
     alias: ref(undefined),
+    color: null,
     sensorId: undefined,
   });
 };
@@ -293,7 +346,7 @@ const create = async () => {
 
     const configs = [];
     for (const request of sensorPrototype(newSensor.prototypeId)
-      .configuration_requests) {
+      .configurationRequests) {
       if (!configRequests.value[`${index}-${request.id}`]) {
         throw new Error(`missing config for ${request.name}`);
       }
@@ -322,8 +375,15 @@ if (target.value) fetchSensorPrototypes(target.value);
 const updateTarget = (targetId: number) => {
   fetchSensorPrototypes(targetId);
   newSensors.value = [
-    { prototypeId: ref(undefined), alias: ref(undefined), sensorId: undefined },
+    {
+      prototypeId: ref(undefined),
+      alias: ref(undefined),
+      color: null,
+      sensorId: undefined,
+    },
   ];
   configRequests.value = {};
 };
 </script>
+
+<style lang="scss" scoped></style>

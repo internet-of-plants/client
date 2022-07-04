@@ -1,11 +1,11 @@
-import type { CollectionView } from "@/models";
+import type { Collection } from "@/models";
 import * as HTTP from "@/http";
 
 export interface CollectionContext {
   collectionId: number;
 }
 
-async function find(ctx: CollectionContext): Promise<CollectionView> {
+async function find(ctx: CollectionContext): Promise<Collection> {
   return await HTTP.get("/v1/collection", ctx);
 }
 

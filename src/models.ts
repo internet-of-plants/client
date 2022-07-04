@@ -89,8 +89,9 @@ export enum MeasurementType {
 export interface Measurement {
   name: string;
   humanName: string;
-  value: string;
   ty: MeasurementType;
+  kind: MeasurementKind;
+  color: string;
 }
 
 export interface Config {
@@ -104,6 +105,7 @@ export interface Sensor {
   id: number;
   name: string;
   alias: string;
+  color: string;
   dependencies: string[];
   includes: string[];
   definitions: string[];
@@ -119,26 +121,7 @@ export interface SensorPrototype {
   includes: string[];
   definitions: string[];
   setups: string[];
-  measurements: Measurement[];
-  configuration_requests: ConfigRequest[];
-}
-
-export interface Collection {
-  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
-  name: string;
-  description: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Device {
-  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
-  name: string;
-  description: string | null;
-  mac: string;
-  firmware_id: string;
-  created_at: string;
-  updated_at: string;
+  configurationRequests: ConfigRequest[];
 }
 
 export interface Event {
@@ -148,7 +131,7 @@ export interface Event {
   updatedAt: string;
 }
 
-export interface DeviceView {
+export interface Device {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
   description: string | null;
@@ -161,7 +144,7 @@ export interface DeviceView {
   updatedAt: string;
 }
 
-export interface CollectionView {
+export interface Collection {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   name: string;
   description: string | null;

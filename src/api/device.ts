@@ -1,11 +1,11 @@
-import type { DeviceView } from "@/models";
+import type { Device } from "@/models";
 import * as HTTP from "@/http";
 
 export interface DeviceContext {
   deviceId: number;
 }
 
-async function find(ctx: DeviceContext): Promise<DeviceView> {
+async function find(ctx: DeviceContext): Promise<Device> {
   return await HTTP.get("/v1/device", ctx);
 }
 

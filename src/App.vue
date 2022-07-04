@@ -17,7 +17,7 @@
 import '@/tailwind.css';
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -40,5 +40,8 @@ import '@/tailwind.css';
       color: #42b983;
     }
   }
+}
+.vc-color-wrap {
+  height: 20px !important;
 }
 </style>
