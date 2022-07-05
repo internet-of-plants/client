@@ -6,7 +6,7 @@
       <router-link
         :to="`/organization/${organizationId}/collection/${collection.id}/device/${d.id}`"
       >
-        <DeviceCard :device="d" />
+        <DeviceCard :device="d" :organization-id="parseOrganizationId" :collection-id="colllection.id" />
       </router-link>
     </div>
   </div>
@@ -20,6 +20,12 @@ import CollectionService from "@/api/collection";
 import router from "@/router";
 
 const { organizationId, collectionId } = useRoute().params;
+try {
+  parseOrganizationId = parseInt(organizationId);
+} catch (_err) {
+  router.push({ path: "/" });
+}
+
 const collection = ref(undefined);
 onMounted(async () => {
   collection.value = await CollectionService.find({

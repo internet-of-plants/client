@@ -1,47 +1,118 @@
 <template>
-  <div class="flex device info card">
-    <p><b>Name:&nbsp;</b>{{props.device.name}}</p>
-    <p><b>MAC:&nbsp;</b>{{props.device.mac}}</p>
-    <p v-if="props.device.description"><b>Description:&nbsp;</b>{{props.device.description}}</p>
-    <p>Created at {{formatTime(now() - new Date(props.device.createdAt))}} ago</p>
-    <p>Updated at {{formatTime(now() - new Date(props.device.updatedAt))}} ago</p>
+  <div v-if="props.device" class="flex flex-col w-full">
+    <strong
+      v-if="props.device.name"
+      class="text-xl text-center"
+    >
+      {{ deviceName }}
+    </strong>
+    <p v-if="props.device.description">
+      <b>Description: </b>{{ props.device.description }}
+    </p>
+
+    <div v-if="props.device.lastEvent" class="flex flex-row flex-wrap justify-center">
+      <span
+        v-for="([key, value], index) in Object.entries(
+          props.device.lastEvent.measurements
+        )"
+        :key="key"
+        class="flex flex-col m-2"
+      >
+        <img
+          v-if="metadata(key)?.kind === MeasurementKind.SoilTemperature"
+          class="w-16 h-16 self-center"
+          src="/soil-temperature.png"
+        />
+        <img
+          v-else-if="metadata(key)?.kind === MeasurementKind.SoilMoisture"
+          class="w-16 h-16 p-2.5 self-center"
+          src="/soil-moisture.png"
+        />
+        <img
+          v-else-if="metadata(key)?.kind === MeasurementKind.AirTemperature"
+          class="w-16 h-16 p-3 self-center"
+          src="/air-temperature.png"
+        />
+        <img
+          v-else-if="metadata(key)?.kind === MeasurementKind.AirHumidity"
+          class="w-16 h-16 p-3.5 self-center"
+          src="/air-humidity.png"
+        />
+        <span class="text-center text-xl"
+          >{{ Math.trunc(value, 2) }}{{ unit(key) }}</span
+        >
+        <pre>{{humanName(key)}}</pre>
+        <span
+          v-if="
+            index ===
+            Object.keys(props.device.lastEvent.measurements).length - 1
+          "
+          class="text-xs"
+        >
+          <Time :moment="props.device.lastEvent.createdAt" />
+        </span>
+      </span>
+    </div>
+
+    <p v-if="props.device.description">
+      <b>Description:&nbsp;</b>{{ props.device.description }}
+    </p>
+
+    <p v-if="!props.device.lastEvent">
+      Updated at <Time :moment="props.device.updatedAt" />
+    </p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Device } from '@/models';
+import { ref } from "vue";
+import Time from "@/atoms/Time.vue";
+import { Device, MeasurementType, MeasurementKind } from "@/models";
 
 const props = defineProps<{
   device: Device;
+  organizationId: number;
+  collectionId: number;
 }>();
 
-const formatTime = (milliseconds: number): string => {
-  const seconds = Math.floor(milliseconds / 1000);
-  if (seconds <= 0) {
-    return '00h:00m';
-  }
+// TODO: change this when prop is updated
+const deviceName = ref(props.device.name);
 
-  if (!Number.isFinite(seconds)) {
-    return 'Never';
-  }
-
-  const hours = Math.floor(seconds / 3600);
-  const hoursString = `0${hours}`.slice(-2);
-
-  const minutes = Math.floor((seconds / 60) % 60);
-  const minutesString = `0${minutes}`.slice(-2);
-
-  return `${hoursString}h:${minutesString}m`;
+const alias = (name: string): string | undefined => {
+  return props.device.compiler?.sensors?.find((s) =>
+    s.measurements.find((m) => m.name === name)
+  )?.alias;
 };
-const now = () => new Date();
+
+const humanName = (name: string) => {
+  const metadata = (props.device.lastEvent?.metadatas ?? []).find(
+    (m) => m.name === name
+  );
+  const humanName = metadata?.humanName ?? name;
+
+  const sensorAlias = alias(metadata.name);
+  return sensorAlias ? `${sensorAlias}\n${humanName}` : humanName;
+};
+
+const metadata = (name: string) => {
+  return (props.device.lastEvent?.metadatas ?? []).find((m) => m.name === name);
+};
+
+const unit = (name: string) => {
+  const metadata = (props.device.lastEvent?.metadatas ?? []).find(
+    (m) => m.name === name
+  );
+  if (!metadata) return "";
+  switch (metadata.ty) {
+    case MeasurementType.Percentage:
+      return "%";
+    case MeasurementType.RawAnalogRead:
+      return "";
+    case MeasurementType.FloatCelsius:
+      return "ºC";
+  }
+};
 </script>
 
 <style scoped lang="scss">
-a {
-  color: inherit !important;
-  text-decoration: none;
-}
-
-.card { width: 100%; margin: 0; padding: 0; display: inline-block; word-wrap: anywhere;}
-.card p { margin: 0; }
 </style>

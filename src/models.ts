@@ -16,12 +16,12 @@ export interface Compilation {
 export interface Target {
   id: number;
   arch: string;
-  build_flags: string;
+  buildFlags: string;
   platform: string;
   framework: string | null;
-  platform_packages: string;
-  extra_platformio_params: string;
-  ldf_mode: string | null;
+  platformPackages: string;
+  extraPlatformioParams: string;
+  ldfMode: string | null;
   board: string | null;
 }
 
@@ -166,7 +166,7 @@ export interface Organization {
 export interface DeviceLog {
   id: number; // TODO: this might break as i64 deserialization to number in js is tricky
   log: string;
-  created_at: string;
+  createdAt: string;
 }
 
 export interface DevicePanic {
@@ -175,8 +175,7 @@ export interface DevicePanic {
   line: number;
   function: string;
   msg: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
 }
 
 export interface Dataset {
@@ -185,22 +184,6 @@ export interface Dataset {
   backgroundColor: string;
   data: number[];
 }
-
-//export interface Chart {
-//  labels: string[];
-//  datasets: Dataset[];
-//}
-//
-//export interface YAxes {
-//  type: string;
-//  id: string;
-//  position?: string;
-//  ticks: {
-//    callback(value: number): string;
-//    min: number;
-//    max?: number;
-//  };
-//}
 
 export interface Firmware {
   id: number;

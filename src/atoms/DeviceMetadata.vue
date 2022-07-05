@@ -19,9 +19,8 @@
       <p v-if="props.device.description">
         <b>Description: </b>{{ props.device.description }}
       </p>
-      <!--<p>Device signed up <Time :moment="props.device.createdAt" /></p>-->
 
-      <div v-if="props.device.lastEvent" class="flex flex-row">
+      <div v-if="props.device.lastEvent" class="flex flex-row flex-wrap justify-center w-full">
         <span
           v-for="([key, value], index) in Object.entries(
             props.device.lastEvent.measurements
@@ -32,27 +31,28 @@
         >
           <img
             v-if="metadata(key)?.kind === MeasurementKind.SoilTemperature"
-            class="w-16 h-16"
+            class="w-16 h-16 self-center"
             src="/soil-temperature.png"
           />
           <img
             v-else-if="metadata(key)?.kind === MeasurementKind.SoilMoisture"
-            class="w-16 h-16 p-2.5"
+            class="w-16 h-16 p-2.5 self-center"
             src="/soil-moisture.png"
           />
           <img
             v-else-if="metadata(key)?.kind === MeasurementKind.AirTemperature"
-            class="w-16 h-16 p-3"
+            class="w-16 h-16 p-3 self-center"
             src="/air-temperature.png"
           />
           <img
             v-else-if="metadata(key)?.kind === MeasurementKind.AirHumidity"
-            class="w-16 h-16 p-3.5"
+            class="w-16 h-16 p-3.5 self-center"
             src="/air-humidity.png"
           />
           <span class="text-center text-xl"
             >{{ Math.trunc(value, 2) }}{{ unit(key) }}</span
           >
+          <pre>{{humanName(key)}}</pre>
           <span
             v-if="
               index ===
@@ -108,7 +108,7 @@ const humanName = (name: string) => {
   const humanName = metadata?.humanName ?? name;
 
   const sensorAlias = alias(metadata.name);
-  return sensorAlias ? `${sensorAlias} - ${humanName}` : humanName;
+  return sensorAlias ? `${sensorAlias}\n${humanName}` : humanName;
 };
 
 const metadata = (name: string) => {

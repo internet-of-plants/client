@@ -34,10 +34,4 @@ const login = async () => {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-a {
-  color: #42b983;
-}
-
-body { width: 100%; margin: 0; padding: 0;}
-.plants { width: 100%; padding: 0; margin: 0; }
 </style>

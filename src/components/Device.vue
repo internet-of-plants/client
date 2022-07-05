@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col w-full items-center m-10">
+  <div class="flex flex-col items-center m-10">
     <button class="right" @click="editing = !editing">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -29,9 +29,9 @@
     <Panics
       v-if="panics && device"
       :panics="panics"
-      :organizationId="parseOrganizationId"
-      :collectionId="parseCollectionId"
-      :deviceId="device.id"
+      :organization-id="parseOrganizationId"
+      :collection-id="parseCollectionId"
+      :device-id="device.id"
     />
 
     <Upload
