@@ -134,7 +134,7 @@ export interface Event {
 }
 
 export interface Device {
-  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  id: number;
   name: string;
   description: string | null;
   target: Target | null;
@@ -147,7 +147,7 @@ export interface Device {
 }
 
 export interface Collection {
-  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  id: number;
   name: string;
   description: string | null;
   devices: Device[];
@@ -156,7 +156,7 @@ export interface Collection {
 }
 
 export interface Organization {
-  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  id: number;
   name: string;
   description: string | null;
   collections: Array<Collection>;
@@ -166,7 +166,7 @@ export interface Organization {
 }
 
 export interface DeviceLog {
-  id: number; // TODO: this might break as i64 deserialization to number in js is tricky
+  id: number;
   log: string;
   createdAt: string;
 }
@@ -192,16 +192,15 @@ export interface Firmware {
   hash: string;
 }
 
-// TODO: make it camel case
 export interface DeviceStat {
   version: string;
-  time_running: number;
+  timeRunning: number;
   vcc: number;
-  free_dram: number;
-  free_iram: number | null;
-  free_stack: number;
-  biggest_dram_block: number;
-  biggest_iram_block: number | null;
+  freeDram: number;
+  freeIram: number | null;
+  freeStack: number;
+  biggestDramBlock: number;
+  biggestIramBlock: number | null;
 }
 
 //export interface ChartOptions {

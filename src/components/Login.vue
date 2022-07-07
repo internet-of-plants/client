@@ -1,5 +1,6 @@
 <template>
-  <div class="login">
+  <div class="login flex w-full flex-row items-center">
+    <div class="items-center flex flex-col w-full">
     <div>
       <label for="email">Email:</label>
       <input type="text" name="email" v-model="user.email" />
@@ -9,6 +10,7 @@
       <input type="password" name="password" v-model="user.password" />
     </div>
     <button v-on:click="login()">Login</button>
+  </div>
   </div>
 </template>
 
@@ -32,6 +34,9 @@ const login = async () => {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+.login {
+  height: 60vh;
+  margin-bottom: 24vh;
+}
 </style>

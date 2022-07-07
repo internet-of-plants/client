@@ -362,7 +362,8 @@ const create = async () => {
     });
   }
   await CompilerService.create(newCompiler);
-  // TODO: redirect?
+
+  emit("refresh");
 };
 
 const fetchSensorPrototypes = async (targetId: number) => {

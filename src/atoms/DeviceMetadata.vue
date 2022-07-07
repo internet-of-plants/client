@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import Time from "@/atoms/Time.vue";
 import { Device, MeasurementType, MeasurementKind } from "@/models";
 import DeviceService from "@/api/device";
@@ -81,8 +81,10 @@ const props = defineProps<{
   editing: boolean;
 }>();
 
-// TODO: change this when prop is updated
 const deviceName = ref(props.device.name);
+watch(props.device, (device) => {
+  deviceName.value = device.name; 
+});
 
 const saveName = async () => {
   if (deviceName.value === props.device.name) return;

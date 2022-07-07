@@ -1,19 +1,21 @@
 <template>
-  <div class="signup">
-    <div>
-      <label for="email">Email:</label>
-      <input type="text" name="email" v-model="user.email" />
+  <div class="signup flex w-full flex-row items-center">
+    <div class="items-center flex flex-col w-full">
+      <div>
+        <label for="email">Email:</label>
+        <input type="text" name="email" v-model="user.email" />
+      </div>
+      <div>
+        <label for="username">Username:</label>
+        <input type="text" name="username" v-model="user.username" />
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" name="password" v-model="user.password" />
+      </div>
+      <button v-on:click="signup()">Signup</button>
     </div>
-    <div>
-      <label for="username">Username:</label>
-      <input type="text" name="username" v-model="user.username" />
     </div>
-    <div>
-      <label for="password">Password:</label>
-      <input type="password" name="password" v-model="user.password" />
-    </div>
-    <button v-on:click="signup()">Signup</button>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -40,13 +42,8 @@ const signup = async () => {
 </script>
 
 <style scoped lang="scss">
-a {
-  color: #42b983;
-}
-
-body {
-  width: 100%;
-  margin: 0;
-  padding: 0;
+.signup {
+  height: 60vh;
+  margin-bottom: 24vh;
 }
 </style>

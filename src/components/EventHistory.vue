@@ -22,7 +22,7 @@
       <option value="twelve-hours">12 Hours</option>
       <option value="one-day">1 Day</option>
     </select>
-    <template v-if="events.length">
+    <template v-if="groupedEvents.length">
       <TimelineChart
         v-for="[chartDatas, chartOpts] in charts"
         :data="chartDatas"
@@ -31,10 +31,10 @@
         :key="chartDatas"
       />
 
-      <h3 v-if="unableToInferTypes && events.length">
+      <h3 v-if="unableToInferTypes && props.showStale && groupedEvents.length">
         Warning: Unable to infer types, chart will be hard to read
       </h3>
-      <h4 v-if="unableToInferTypes && events.length">
+      <h4 v-if="unableToInferTypes && props.showStale && groupedEvents.length">
         Properly configure the device, adding a target and the appropriate
         sensors to view more detailed charts
       </h4>
@@ -220,7 +220,7 @@ const truncateTime = (time, interval) => {
 const groupedEvents = computed(() => {
   const group = {};
   for (const ev of events.value) {
-    const time = truncateTime(new Date(ev.createdAt), interval.value);
+    const time = truncateTime(new Date(ev.createdAt), interval.value).getTime();
     if (!group[time]) group[time] = [];
     group[time].push(ev);
   }
@@ -230,7 +230,7 @@ const groupedEvents = computed(() => {
       measurements: {},
       metadatas: ev[0].metadatas, // TODO: check that metadatas are the same in all events
       stat: {},
-      createdAt: time,
+      createdAt: new Date(parseInt(time)),
     };
     for (const e of ev) {
       for (const [key, value] of Object.entries(e.measurements)) {
@@ -259,6 +259,7 @@ const groupedEvents = computed(() => {
   }
   const ret = Object.values(group);
   ret.sort((a, b) => a.createdAt - b.createdAt);
+  console.log(ret);
   return ret;
 });
 
@@ -352,42 +353,6 @@ const metadatas = computed(() => {
           color: color(metadata.name) ?? metadata.color,
         };
       }
-
-      // TODO: hardcode colors
-      obj["free_dram"] = {
-        ty: MeasurementType.Heap,
-        humanName: "Free DRAM",
-        stat: true,
-        color: generateColor(),
-      };
-      if (event.stat.free_iram) {
-        obj["free_iram"] = {
-          ty: MeasurementType.Heap,
-          humanName: "Free IRAM",
-          stat: true,
-          color: generateColor(),
-        };
-      }
-      obj["free_stack"] = {
-        ty: MeasurementType.Stack,
-        humanName: "Free STACK",
-        stat: true,
-        color: generateColor(),
-      };
-      obj["biggest_dram_block"] = {
-        ty: MeasurementType.Heap,
-        humanName: "Biggest DRAM Block",
-        stat: true,
-        color: generateColor(),
-      };
-      if (event.stat.biggest_iram_block) {
-        obj["biggest_iram_block"] = {
-          ty: MeasurementType.Heap,
-          humanName: "Biggest IRAM Block",
-          stat: true,
-          color: generateColor(),
-        };
-      }
     } else {
       if (!props.showStale) continue;
 
@@ -400,6 +365,42 @@ const metadatas = computed(() => {
           color: null,
         };
       }
+    }
+
+    // TODO: hardcode colors
+    obj["freeDram"] = {
+      ty: MeasurementType.Heap,
+      humanName: "Free DRAM",
+      stat: true,
+      color: "#fff176",
+    };
+    if (event.stat.freeIram) {
+      obj["freeIram"] = {
+        ty: MeasurementType.Heap,
+        humanName: "Free IRAM",
+        stat: true,
+        color: "#4cb050",
+      };
+    }
+    obj["freeStack"] = {
+      ty: MeasurementType.Stack,
+      humanName: "Free STACK",
+      stat: true,
+      color: "#64b5f6",
+    };
+    obj["biggestDramBlock"] = {
+      ty: MeasurementType.Heap,
+      humanName: "Biggest DRAM Block",
+      stat: true,
+      color: "#ffab91",
+    };
+    if (event.stat.biggestIramBlock) {
+      obj["biggestIramBlock"] = {
+        ty: MeasurementType.Heap,
+        humanName: "Biggest IRAM Block",
+        stat: true,
+        color: "#008781",
+      };
     }
   }
   return obj;
@@ -520,10 +521,7 @@ const chartOptions = (ty: MeasurementType): ChartOptions => {
 
 const chartData = (ty: MeasurementType): ChartData => {
   const datasets = [];
-  const data = groupedEvents.value.map((e) => {
-    e.createdAt = new Date(e.createdAt);
-    return e;
-  });
+  const data = groupedEvents.value;
   for (const [field, metadata] of Object.entries(metadatas.value)) {
     if (metadata.ty !== ty) continue;
 

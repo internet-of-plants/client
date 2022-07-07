@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import Time from "@/atoms/Time.vue";
 import { Device, MeasurementType, MeasurementKind } from "@/models";
 
@@ -75,8 +75,10 @@ const props = defineProps<{
   collectionId: number;
 }>();
 
-// TODO: change this when prop is updated
 const deviceName = ref(props.device.name);
+watch(props.device, (device) => {
+  deviceName.value = device.name;
+});
 
 const alias = (name: string): string | undefined => {
   return props.device.compiler?.sensors?.find((s) =>
