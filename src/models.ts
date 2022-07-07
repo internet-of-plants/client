@@ -83,6 +83,8 @@ export enum MeasurementType {
   Percentage = "Percentage",
   FloatCelsius = "FloatCelsius",
   RawAnalogRead = "RawAnalogRead",
+  Heap = "Heap",
+  Stack = "Stack",
   Unknown = "Unknown"
 }
 
@@ -127,8 +129,8 @@ export interface SensorPrototype {
 export interface Event {
   measurements: unknown;
   metadatas: Measurement[];
+  stat: DeviceStat;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface Device {
@@ -188,6 +190,18 @@ export interface Dataset {
 export interface Firmware {
   id: number;
   hash: string;
+}
+
+// TODO: make it camel case
+export interface DeviceStat {
+  version: string;
+  time_running: number;
+  vcc: number;
+  free_dram: number;
+  free_iram: number | null;
+  free_stack: number;
+  biggest_dram_block: number;
+  biggest_iram_block: number | null;
 }
 
 //export interface ChartOptions {

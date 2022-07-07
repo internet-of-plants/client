@@ -6,7 +6,7 @@
       <p>{{ p.line }}</p>
       <p>{{ p.func }}</p>
       <p>{{ p.msg }}</p>
-      <p>Happened <Time :moment="p.created_at" /></p>
+      <p>Happened <Time :moment="p.createdAt" /></p>
       <button v-on:click="solveDevicePanic(p.id)">Solve</button>
     </div>
   </template>

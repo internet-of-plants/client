@@ -46,9 +46,10 @@
     <Logs v-if="logs" :logs="logs" />
 
     <EventHistory
-      v-if="events && device"
+      v-if="device"
       :device="device"
-      :history="events"
+      :organization-id="parseOrganizationId"
+      :collection-id="parseCollectionId"
       :show-stale="(device.compiler?.sensors?.length ?? 0) == 0"
     />
   </div>
@@ -67,7 +68,6 @@ import router from "@/router";
 import PanicService from "@/api/panic";
 import LogService from "@/api/log";
 import DeviceService from "@/api/device";
-import EventService from "@/api/event";
 
 const editing = ref(false);
 
@@ -90,7 +90,6 @@ try {
 const device = ref(undefined);
 const logs = ref(undefined);
 const panics = ref(undefined);
-const events = ref(undefined);
 
 const load = async () => {
   device.value = await DeviceService.find({
@@ -114,13 +113,6 @@ onMounted(async () => {
     organizationId,
     collectionId,
     deviceId,
-  });
-
-  events.value = await EventService.list({
-    organizationId,
-    collectionId,
-    deviceId,
-    limit: 500,
   });
 });
 </script>

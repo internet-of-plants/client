@@ -2,7 +2,7 @@
   <template v-if="props.logs.length > 0">
     <h3 v-if="props.logs.length > 1">Last {{ props.logs.length }} logs</h3>
     <div v-for="l in props.logs" :key="l.id">
-      <p><span v-if="props.logs.length == 1">Last log: </span>{{ l.log }} - <Time :moment="l.created_at" /></p>
+      <p><span v-if="props.logs.length == 1">Last log: </span>{{ l.log }} - <Time :moment="l.createdAt" /></p>
     </div>
   </template>
 </template>

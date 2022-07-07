@@ -1,37 +1,315 @@
 <template>
-  <template v-if="props.history.length">
-    <TimelineChart
-      v-for="[chartData, chartOptions] in charts"
-      :data="chartData"
-      :options="chartOptions"
-      class="w-full mt-5 px-40"
-      :key="chartData"
-    />
+  <span class="mt-3 w-full">
+    <select v-model="since">
+      <option value="past-1-day">Past Day</option>
+      <option value="today">Today</option>
+      <option value="past-3-days">Past 3 Days</option>
+      <option value="past-7-days">Past 7 Days</option>
+      <option value="this-week">This Week</option>
+      <option value="past-30-days">Past 30 Days</option>
+      <option value="this-month">This Month</option>
+    </select>
 
-    <h3 v-if="unableToInferTypes && props.history.length">
-      Warning: Unable to infer types, chart will be hard to read
-    </h3>
-    <h4 v-if="unableToInferTypes && props.history.length">
-      Properly configure the device, adding a target and the appropriate sensors
-      to view more detailed charts
-    </h4>
-  </template>
+    <select v-model="interval" class="ml-2">
+      <option value="no-filter">No Filter</option>
+      <option value="five-minutes">5 Minutes</option>
+      <option value="ten-minutes">10 Minutes</option>
+      <option value="half-hour">Half Hour</option>
+      <option value="one-hour">1 Hour</option>
+      <option value="three-hours">3 Hours</option>
+      <option value="four-hours">4 Hours</option>
+      <option value="six-hours">6 Hours</option>
+      <option value="twelve-hours">12 Hours</option>
+      <option value="one-day">1 Day</option>
+    </select>
+    <template v-if="events.length">
+      <TimelineChart
+        v-for="[chartDatas, chartOpts] in charts"
+        :data="chartDatas"
+        :options="chartOpts"
+        class="w-full mt-5 px-40"
+        :key="chartDatas"
+      />
+
+      <h3 v-if="unableToInferTypes && events.length">
+        Warning: Unable to infer types, chart will be hard to read
+      </h3>
+      <h4 v-if="unableToInferTypes && events.length">
+        Properly configure the device, adding a target and the appropriate
+        sensors to view more detailed charts
+      </h4>
+    </template>
+  </span>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import TimelineChart from "@/components/TimelineChart.vue";
-import { Event, MeasurementType, Device } from "@/models";
+import { MeasurementType, Device } from "@/models";
 import { ChartData, ChartOptions } from "chart.js";
+import EventService from "@/api/event";
+
+const events = ref([]);
+const since = ref("past-1-day");
+const interval = ref("no-filter");
+
+const pastDays = (days) => {
+  const d = new Date();
+  d.setHours(d.getHours() - days * 24);
+  d.setHours(0);
+  d.setMinutes(0);
+  d.setSeconds(0);
+  d.setMilliseconds(0);
+  return d.toISOString();
+};
 
 const props = defineProps<{
   device: Device;
-  history: Event[];
+  organizationId: number;
+  collectionId: number;
   showStale: boolean;
 }>();
 
+const truncateTime = (time, interval) => {
+  time.setSeconds(0);
+  time.setMilliseconds(0);
+
+  let closest = 0;
+  let index;
+  switch (interval) {
+    case "no-filter":
+      break;
+    case "five-minutes":
+      for (index = 0; index <= 12; index++) {
+        if (
+          Math.abs(index * 5 - time.getMinutes()) <
+          Math.abs(index * 5 - closest)
+        ) {
+          closest = index * 5;
+        }
+      }
+      if (closest == 60) {
+        time.setMinutes(0);
+        time.setHours(time.getHours() + 1);
+      } else {
+        time.setMinutes(closest);
+      }
+      break;
+    case "ten-minutes":
+      for (index = 0; index <= 6; index++) {
+        if (
+          Math.abs(index * 10 - time.getMinutes()) <
+          Math.abs(index * 10 - closest)
+        ) {
+          closest = index * 10;
+        }
+      }
+      if (closest == 60) {
+        time.setMinutes(0);
+        time.setHours(time.getHours() + 1);
+      } else {
+        time.setMinutes(closest);
+      }
+      break;
+    case "half-hour":
+      for (index = 0; index <= 2; index++) {
+        if (
+          Math.abs(index * 30 - time.getMinutes()) <
+          Math.abs(index * 30 - closest)
+        ) {
+          closest = index * 30;
+        }
+      }
+      if (closest == 60) {
+        time.setMinutes(0);
+        time.setHours(time.getHours() + 1);
+      } else {
+        time.setMinutes(closest);
+      }
+      break;
+    case "one-hour":
+      for (index = 0; index <= 24; index++) {
+        if (Math.abs(index - time.getHours()) < Math.abs(index - closest)) {
+          closest = index;
+        }
+      }
+      if (closest == 24) {
+        time.setHours(time.getTime() + 24);
+        time.setHours(0);
+      } else {
+        time.setHours(closest);
+        time.setMinutes(0);
+      }
+      break;
+    case "three-hours":
+      for (index = 0; index <= 8; index++) {
+        if (
+          Math.abs(index * 3 - time.getHours()) < Math.abs(index * 3 - closest)
+        ) {
+          closest = index * 3;
+        }
+      }
+      if (closest == 24) {
+        time.setHours(time.getTime() + 24);
+        time.setHours(0);
+      } else {
+        time.setHours(closest);
+        time.setMinutes(0);
+      }
+      break;
+    case "four-hours":
+      for (index = 0; index <= 6; index++) {
+        if (
+          Math.abs(index * 4 - time.getHours()) < Math.abs(index * 4 - closest)
+        ) {
+          closest = index * 4;
+        }
+      }
+      if (closest == 24) {
+        time.setHours(time.getTime() + 24);
+        time.setHours(0);
+      } else {
+        time.setHours(closest);
+        time.setMinutes(0);
+      }
+      break;
+    case "six-hours":
+      for (index = 0; index <= 4; index++) {
+        if (
+          Math.abs(index * 6 - time.getHours()) < Math.abs(index * 6 - closest)
+        ) {
+          closest = index * 6;
+        }
+      }
+      if (closest == 24) {
+        time.setHours(time.getTime() + 24);
+        time.setHours(0);
+      } else {
+        time.setHours(closest);
+        time.setMinutes(0);
+      }
+      break;
+    case "twelve-hours":
+      for (index = 0; index <= 2; index++) {
+        if (
+          Math.abs(index * 12 - time.getHours()) <
+          Math.abs(index * 12 - closest)
+        ) {
+          closest = index * 12;
+        }
+      }
+      if (closest == 24) {
+        time.setHours(time.getTime() + 24);
+        time.setHours(0);
+      } else {
+        time.setHours(closest);
+        time.setMinutes(0);
+      }
+      break;
+    case "one-day":
+      time.setHours(time.getHours() + 12);
+      time.setHours(0);
+      time.setMinutes(0);
+      break;
+    default:
+      throw new Error("unknown interval: " + interval);
+  }
+  return time;
+};
+
+const groupedEvents = computed(() => {
+  const group = {};
+  for (const ev of events.value) {
+    const time = truncateTime(new Date(ev.createdAt), interval.value);
+    if (!group[time]) group[time] = [];
+    group[time].push(ev);
+  }
+
+  for (const [time, ev] of Object.entries(group)) {
+    const normalized = {
+      measurements: {},
+      metadatas: ev[0].metadatas, // TODO: check that metadatas are the same in all events
+      stat: {},
+      createdAt: time,
+    };
+    for (const e of ev) {
+      for (const [key, value] of Object.entries(e.measurements)) {
+        if (!normalized.measurements[key]) normalized.measurements[key] = [];
+        normalized.measurements[key].push(value);
+      }
+      for (const [key, value] of Object.entries(e.stat)) {
+        if (!normalized.stat[key]) normalized.stat[key] = [];
+        normalized.stat[key].push(value);
+      }
+    }
+
+    for (const [key, value] of Object.entries(normalized.measurements)) {
+      normalized.measurements[key] = value.reduce(
+        (v, acc) => (acc += v / value.length),
+        0
+      );
+    }
+    for (const [key, value] of Object.entries(normalized.stat)) {
+      normalized.stat[key] = value.reduce(
+        (v, acc) => (acc += v / value.length),
+        0
+      );
+    }
+    group[time] = normalized;
+  }
+  const ret = Object.values(group);
+  ret.sort((a, b) => a.createdAt - b.createdAt);
+  return ret;
+});
+
+onMounted(async () => {
+  events.value = await EventService.list({
+    organizationId: props.organizationId,
+    collectionId: props.collectionId,
+    deviceId: props.device.id,
+    since: pastDays(1),
+  });
+});
+
+watch(since, async (value) => {
+  let start;
+  const now = new Date();
+  switch (value) {
+    case "past-1-day":
+      start = pastDays(1);
+      break;
+    case "today":
+      start = pastDays(0);
+      break;
+    case "past-3-days":
+      start = pastDays(3);
+      break;
+    case "past-7-days":
+      start = pastDays(7);
+      break;
+    case "past-30-days":
+      start = pastDays(30);
+      break;
+    case "this-week":
+      start = pastDays(now.getDay());
+    case "this-month":
+      start = pastDays(now.getDate());
+      break;
+    default:
+      throw new Error("unknown since: " + value);
+  }
+
+  if (!start) throw new Error("failed to get time");
+  events.value = await EventService.list({
+    organizationId: props.organizationId,
+    collectionId: props.collectionId,
+    deviceId: props.device.id,
+    since: start,
+  });
+});
+
 const unableToInferTypes = ref(
-  props.history?.every((e) => e.metadatas.length === 0) ?? true
+  events.value?.every((e) => e.metadatas.length === 0) ?? true
 );
 
 const color = (name: string): string | undefined => {
@@ -46,10 +324,17 @@ const alias = (name: string): string | undefined => {
   )?.alias;
 };
 
+const generateColor = () => {
+  if (unableToInferTypes.value) {
+    return "#" + Math.floor(Math.random() * 16777215).toString(16);
+  }
+  return "#666666";
+};
+
 const metadatas = computed(() => {
   const obj = {};
   // This is horrible
-  for (const event of props.history) {
+  for (const event of groupedEvents.value) {
     if (event.metadatas.length !== 0) {
       for (const metadata of event.metadatas) {
         if (obj[metadata.name]) continue;
@@ -63,7 +348,44 @@ const metadatas = computed(() => {
         obj[metadata.name] = {
           ty: metadata.ty,
           humanName,
+          stat: false,
           color: color(metadata.name) ?? metadata.color,
+        };
+      }
+
+      // TODO: hardcode colors
+      obj["free_dram"] = {
+        ty: MeasurementType.Heap,
+        humanName: "Free DRAM",
+        stat: true,
+        color: generateColor(),
+      };
+      if (event.stat.free_iram) {
+        obj["free_iram"] = {
+          ty: MeasurementType.Heap,
+          humanName: "Free IRAM",
+          stat: true,
+          color: generateColor(),
+        };
+      }
+      obj["free_stack"] = {
+        ty: MeasurementType.Stack,
+        humanName: "Free STACK",
+        stat: true,
+        color: generateColor(),
+      };
+      obj["biggest_dram_block"] = {
+        ty: MeasurementType.Heap,
+        humanName: "Biggest DRAM Block",
+        stat: true,
+        color: generateColor(),
+      };
+      if (event.stat.biggest_iram_block) {
+        obj["biggest_iram_block"] = {
+          ty: MeasurementType.Heap,
+          humanName: "Biggest IRAM Block",
+          stat: true,
+          color: generateColor(),
         };
       }
     } else {
@@ -74,6 +396,7 @@ const metadatas = computed(() => {
         obj[name] = {
           ty: MeasurementType.Unknown,
           humanName: name,
+          stat: false,
           color: null,
         };
       }
@@ -115,6 +438,12 @@ const chartOptions = (ty: MeasurementType): ChartOptions => {
             case MeasurementType.FloatCelsius:
               value = `${value}ºC`;
               break;
+            case MeasurementType.Heap:
+              value = `${value}B`;
+              break;
+            case MeasurementType.Stack:
+              value = `${value}B`;
+              break;
           }
           return value;
         },
@@ -132,7 +461,14 @@ const chartOptions = (ty: MeasurementType): ChartOptions => {
     case MeasurementType.FloatCelsius:
       text = "Temperature";
       break;
+    case MeasurementType.Heap:
+      text = "Heap";
+      break;
+    case MeasurementType.Stack:
+      text = "Stack";
+      break;
   }
+
   return {
     responsive: true,
     interaction: {
@@ -166,6 +502,12 @@ const chartOptions = (ty: MeasurementType): ChartOptions => {
               case MeasurementType.FloatCelsius:
                 value += "ºC";
                 break;
+              case MeasurementType.Heap:
+                value += "B";
+                break;
+              case MeasurementType.Stack:
+                value += "B";
+                break;
             }
             return `${metadata?.humanName ?? field}: ${value}`;
           },
@@ -176,32 +518,38 @@ const chartOptions = (ty: MeasurementType): ChartOptions => {
   };
 };
 
-const generateColor = () => {
-  if (unableToInferTypes.value) {
-    return "#" + Math.floor(Math.random() * 16777215).toString(16);
-  }
-  return "#666666";
-};
-
 const chartData = (ty: MeasurementType): ChartData => {
   const datasets = [];
-  const data = props.history.map((e) => {
+  const data = groupedEvents.value.map((e) => {
     e.createdAt = new Date(e.createdAt);
     return e;
   });
   for (const [field, metadata] of Object.entries(metadatas.value)) {
     if (metadata.ty !== ty) continue;
 
-    datasets.push({
-      label: metadata.humanName,
-      yAxisID: metadata.ty,
-      data,
-      backgroundColor: metadata.color ? metadata.color : generateColor(),
-      parsing: {
-        xAxisKey: `createdAt`,
-        yAxisKey: `measurements.${field}`,
-      },
-    });
+    if (!metadata.stat) {
+      datasets.push({
+        label: metadata.humanName,
+        yAxisID: metadata.ty,
+        data,
+        backgroundColor: metadata.color ? metadata.color : generateColor(),
+        parsing: {
+          xAxisKey: `createdAt`,
+          yAxisKey: `measurements.${field}`,
+        },
+      });
+    } else {
+      datasets.push({
+        label: metadata.humanName,
+        yAxisID: metadata.ty,
+        data,
+        backgroundColor: metadata.color ? metadata.color : generateColor(),
+        parsing: {
+          xAxisKey: `createdAt`,
+          yAxisKey: `stat.${field}`,
+        },
+      });
+    }
   }
 
   return {
@@ -211,8 +559,12 @@ const chartData = (ty: MeasurementType): ChartData => {
 
 const charts = computed((): ChartData[] => {
   const types: Set<MeasurementType> = new Set(
-    props.history.flatMap((e) => Object.values(e.metadatas)).map((m) => m.ty)
+    groupedEvents.value
+      .flatMap((e) => Object.values(e.metadatas))
+      .map((m) => m.ty)
   );
+  types.add(MeasurementType.Heap);
+  types.add(MeasurementType.Stack);
 
   const pair = [];
   for (const type of types) {
@@ -225,5 +577,4 @@ const charts = computed((): ChartData[] => {
 });
 </script>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>
