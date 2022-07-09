@@ -51,7 +51,7 @@ import EventService from "@/api/event";
 
 const events = ref([]);
 const since = ref("past-1-day");
-const interval = ref("no-filter");
+const interval = ref("half-hour");
 
 const pastDays = (days) => {
   const d = new Date();
