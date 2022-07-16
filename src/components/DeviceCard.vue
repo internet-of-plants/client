@@ -90,10 +90,14 @@ const humanName = (name: string) => {
   const metadata = (props.device.lastEvent?.metadatas ?? []).find(
     (m) => m.name === name
   );
-  const humanName = metadata?.humanName ?? name;
 
-  const sensorAlias = alias(metadata.name);
-  return sensorAlias ? `${sensorAlias}\n${humanName}` : humanName;
+  if (metadata) {
+    const humanName = metadata.humanName;
+    const sensorAlias = alias(metadata.name);
+    return sensorAlias ? `${sensorAlias}\n${humanName}` : humanName;
+  } else {
+    return name;
+  }
 };
 
 const metadata = (name: string) => {

@@ -23,7 +23,7 @@ const { organizationId, collectionId } = useRoute().params;
 try {
   parseOrganizationId = parseInt(organizationId);
 } catch (_err) {
-  router.push({ path: "/" });
+  //router.push({ path: "/" });
 }
 
 const collection = ref(undefined);
@@ -33,7 +33,7 @@ onMounted(async () => {
     collectionId,
   });
   if (collection.value.devices.length === 0) {
-    router.push({ path: `/organization/${organizationId}` });
+    //router.push({ path: `/organization/${organizationId}` });
   } else if (collection.value.devices.length === 1) {
     router.push({
       path: `/organization/${organizationId}/collection/${collectionId}/device/${collection.value.devices[0].id}`,
