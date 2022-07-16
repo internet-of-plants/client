@@ -221,45 +221,50 @@ const groupedEvents = computed(() => {
   const group = {};
   for (const ev of events.value) {
     const time = truncateTime(new Date(ev.createdAt), interval.value).getTime();
-    if (!group[time]) group[time] = [];
-    group[time].push(ev);
-  }
-
-  for (const [time, ev] of Object.entries(group)) {
-    const normalized = {
-      measurements: {},
-      metadatas: ev[0].metadatas, // TODO: check that metadatas are the same in all events
-      stat: {},
-      createdAt: new Date(parseInt(time)),
-    };
-    for (const e of ev) {
-      for (const [key, value] of Object.entries(e.measurements)) {
-        if (!normalized.measurements[key]) normalized.measurements[key] = [];
-        normalized.measurements[key].push(value);
-      }
-      for (const [key, value] of Object.entries(e.stat)) {
-        if (!normalized.stat[key]) normalized.stat[key] = [];
-        normalized.stat[key].push(value);
-      }
+    const subkey = JSON.stringify(ev.metadatas);
+    if (!group[time]) group[time] = {};
+    if (!group[time][subkey]) {
+      group[time][subkey] = {
+        createdAt: time,
+        metadatas: ev.metadatas,
+      };
     }
 
-    for (const [key, value] of Object.entries(normalized.measurements)) {
-      normalized.measurements[key] = value.reduce(
-        (v, acc) => (acc += v / value.length),
-        0
-      );
+    for (const [key, value] of Object.entries(e.measurements)) {
+      if (!normalized.measurements[key]) normalized.measurements[key] = [];
+      normalized.measurements[key].push(value);
     }
-    for (const [key, value] of Object.entries(normalized.stat)) {
-      normalized.stat[key] = value.reduce(
-        (v, acc) => (acc += v / value.length),
-        0
-      );
+    for (const [key, value] of Object.entries(e.stat)) {
+      if (!normalized.stat[key]) normalized.stat[key] = [];
+      normalized.stat[key].push(value);
     }
-    group[time] = normalized;
+
+    for (const [time, normalized] of Object.entries(group)) {
+      for (const [key, value] of Object.entries(normalized.measurements)) {
+        const decimalPlaces = value.reduce(
+          (v, acc) => (acc = Math.max(v.toString().split(".").length - 1, acc)),
+          0
+        );
+        normalized.measurements[key] = value
+          .reduce((v, acc) => (acc += v / value.length), 0)
+          .toFixed(decimalPlaces + 1);
+      }
+
+      for (const [key, value] of Object.entries(normalized.stat)) {
+        const decimalPlaces = value.reduce(
+          (v, acc) => (acc = Math.max(v.toString().split(".").length - 1, acc)),
+          0
+        );
+        normalized.stat[key] = value
+          .reduce((v, acc) => (acc += v / value.length), 0)
+          .toFixed(decimalPlaces + 1);
+      }
+
+      group[time] = normalized;
+    }
   }
   const ret = Object.values(group);
   ret.sort((a, b) => a.createdAt - b.createdAt);
-  console.log(ret);
   return ret;
 });
 
@@ -310,7 +315,7 @@ watch(since, async (value) => {
 });
 
 const unableToInferTypes = ref(
-  events.value?.every((e) => e.metadatas.length === 0) ?? true
+  groupedEvents.value?.every((e) => e.metadatas.length === 0) ?? true
 );
 
 const color = (name: string): string | undefined => {
@@ -367,7 +372,6 @@ const metadatas = computed(() => {
       }
     }
 
-    // TODO: hardcode colors
     obj["freeDram"] = {
       ty: MeasurementType.Heap,
       humanName: "Free DRAM",

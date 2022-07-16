@@ -2,6 +2,10 @@
   <div class="signup flex w-full flex-row items-center">
     <div class="items-center flex flex-col w-full">
       <div>
+        <label for="organization-name">Organization Name:</label>
+        <input type="text" name="organization-name" v-model="user.organizationName" />
+      </div>
+      <div>
         <label for="email">Email:</label>
         <input type="text" name="email" v-model="user.email" />
       </div>
@@ -23,7 +27,7 @@ import { ref } from "vue";
 import config from "@/constants";
 import router from "@/router";
 
-const user = ref({ email: "", username: "", password: "" });
+const user = ref({ email: "", username: "", password: "", organizationName: "" });
 if (localStorage.getItem("token") !== null) {
   router.push({ path: "/" });
 }
