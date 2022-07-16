@@ -130,17 +130,17 @@
                   ].includes(request.ty.widget.kind)
                 "
               >
-                <input v-model="configRequests[`${index}-${request.id}`]" />
+                <input v-model="sensorConfigRequests[`${index}-${request.id}`]" />
               </template>
               <template
                 v-else-if="request.ty.widget.kind === WidgetKind.String"
               >
-                <input v-model="configRequests[`${index}-${request.id}`]" />
+                <input v-model="sensorConfigRequests[`${index}-${request.id}`]" />
               </template>
               <template
                 v-else-if="request.ty.widget.kind === WidgetKind.Selection"
               >
-                <select v-model="configRequests[`${index}-${request.id}`]">
+                <select v-model="sensorConfigRequests[`${index}-${request.id}`]">
                   <option value=""></option>
                   <option
                     v-for="opt in request.ty.widget.data"
@@ -152,7 +152,7 @@
                 </select>
               </template>
             </span>
-            <span v-else>{{ configRequests[`${index}-${request.id}`] }}</span>
+            <span v-else>{{ sensorConfigRequests[`${index}-${request.id}`] }}</span>
           </span>
         </span>
       </div>
@@ -231,7 +231,7 @@ propSensorIds.push({
 });
 
 const newSensors = ref(propSensorIds);
-const configRequests = ref(
+const sensorConfigRequests = ref(
   Object.entries(props.device.compiler?.sensors ?? [])
     .flatMap(([index, s]) => s.configurations.map((c) => [index, c]))
     .reduce(
@@ -335,6 +335,7 @@ const create = async () => {
     deviceId: props.device.id,
     targetId: target.value,
     sensors: [],
+    deviceConfigs: [],
   };
 
   for (const [index, newSensor] of Object.entries(newSensors.value)) {
@@ -347,12 +348,12 @@ const create = async () => {
     const configs = [];
     for (const request of sensorPrototype(newSensor.prototypeId)
       .configurationRequests) {
-      if (!configRequests.value[`${index}-${request.id}`]) {
+      if (!sensorConfigRequests.value[`${index}-${request.id}`]) {
         throw new Error(`missing config for ${request.name}`);
       }
       configs.push({
         requestId: request.id,
-        value: configRequests.value[`${index}-${request.id}`],
+        value: sensorConfigRequests.value[`${index}-${request.id}`],
       });
     }
     newCompiler.sensors.push({
@@ -383,7 +384,7 @@ const updateTarget = (targetId: number) => {
       sensorId: undefined,
     },
   ];
-  configRequests.value = {};
+  sensorConfigRequests.value = {};
 };
 </script>
 
