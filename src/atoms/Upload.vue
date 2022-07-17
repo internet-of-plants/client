@@ -379,12 +379,12 @@ const create = async () => {
     const value = deviceConfigs.value[request.id];
     switch (request.ty.widget) {
       case DeviceWidgetKind.SSID:
-        if (value.length > 64)
-          throw new Error(`SSID is too long: ${value}, max length is 64`);
+        if (value.length > 32)
+          throw new Error(`SSID is too long: ${value}, max length is 32`);
         break;
       case DeviceWidgetKind.PSK:
-        if (value.length > 32)
-          throw new Error(`PSK is too long: ${value}, max length is 32`);
+        if (value.length > 64)
+          throw new Error(`PSK is too long: ${value}, max length is 64`);
         break;
     }
 
