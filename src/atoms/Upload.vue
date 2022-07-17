@@ -252,7 +252,6 @@ propSensorIds.push({
 });
 
 const newSensors = ref(propSensorIds);
-console.log(newSensors.value);
 const sensorConfigs = ref(
   Object.entries(props.device.compiler?.sensors ?? [])
     .flatMap(([index, s]) => s.configurations.map((c) => [index, c]))

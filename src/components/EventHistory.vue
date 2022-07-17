@@ -227,41 +227,61 @@ const groupedEvents = computed(() => {
       group[time][subkey] = {
         createdAt: time,
         metadatas: ev.metadatas,
+        measurements: {},
+        stat: {},
       };
     }
 
-    for (const [key, value] of Object.entries(e.measurements)) {
-      if (!normalized.measurements[key]) normalized.measurements[key] = [];
-      normalized.measurements[key].push(value);
+    for (const [key, value] of Object.entries(ev.measurements)) {
+      if (!group[time][subkey].measurements[key])
+        group[time][subkey].measurements[key] = [];
+      group[time][subkey].measurements[key].push(value);
     }
-    for (const [key, value] of Object.entries(e.stat)) {
-      if (!normalized.stat[key]) normalized.stat[key] = [];
-      normalized.stat[key].push(value);
+    for (const [key, value] of Object.entries(ev.stat)) {
+      if (!group[time][subkey].stat[key]) group[time][subkey].stat[key] = [];
+      group[time][subkey].stat[key].push(value);
     }
+  }
 
-    for (const [time, normalized] of Object.entries(group)) {
-      for (const [key, value] of Object.entries(normalized.measurements)) {
+  for (const [time, object] of Object.entries(group)) {
+    const normalized = {
+      measurements: {},
+      stat: {},
+    };
+
+    for (const obj of Object.values(object)) {
+      if (!normalized.createdAt) normalized.createdAt = obj.createdAt;
+      if (!normalized.metadatas) normalized.metadatas = obj.metadatas;
+
+      for (const [key, value] of Object.entries(obj.measurements)) {
         const decimalPlaces = value.reduce(
-          (v, acc) => (acc = Math.max(v.toString().split(".").length - 1, acc)),
+          (acc, v) =>
+            Math.max((v.toString().split(".")[1]?.length ?? 1) - 1, acc),
           0
         );
         normalized.measurements[key] = value
-          .reduce((v, acc) => (acc += v / value.length), 0)
+          .reduce((acc, v) => acc + v / value.length, 0)
           .toFixed(decimalPlaces + 1);
       }
 
-      for (const [key, value] of Object.entries(normalized.stat)) {
+      for (const [key, value] of Object.entries(obj.stat)) {
+        if (typeof value[0] === typeof "" || value[0] === null) {
+          normalized.stat[key] = value;
+          continue;
+        }
+
         const decimalPlaces = value.reduce(
-          (v, acc) => (acc = Math.max(v.toString().split(".").length - 1, acc)),
+          (acc, v) =>
+            Math.max((v.toString().split(".")[1]?.length ?? 1) - 1, acc),
           0
         );
         normalized.stat[key] = value
-          .reduce((v, acc) => (acc += v / value.length), 0)
+          .reduce((acc, v) => acc + v / value.length, 0)
           .toFixed(decimalPlaces + 1);
       }
-
-      group[time] = normalized;
     }
+
+    group[time] = normalized;
   }
   const ret = Object.values(group);
   ret.sort((a, b) => a.createdAt - b.createdAt);
