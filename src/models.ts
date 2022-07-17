@@ -1,8 +1,16 @@
 export interface Compiler {
   id: number;
   sensors: Sensor[];
+  deviceConfigs: DeviceConfig[];
   target: Target;
   latestFirmware: Firmware;
+}
+
+export interface DeviceConfig {
+  requestId: number;
+  name: string;
+  typeName: string;
+  value: string;
 }
 
 export interface Compilation {
@@ -16,6 +24,7 @@ export interface Compilation {
 export interface Target {
   id: number;
   arch: string;
+  name: string;
   buildFlags: string;
   platform: string;
   framework: string | null;
@@ -23,6 +32,29 @@ export interface Target {
   extraPlatformioParams: string;
   ldfMode: string | null;
   board: string | null;
+  configurationRequests: DeviceConfigRequest[];
+}
+
+export interface DeviceConfigRequest {
+  id: number;
+  name: string;
+  humanName: string;
+  secretAlgo: SecretAlgo | null;
+  ty: DeviceConfigType;
+}
+
+export interface DeviceConfigType {
+  name: string;
+  widget: DeviceWidgetKind;
+}
+
+export enum SecretAlgo {
+  LibsodiumSealedBox = "LibsodiumSealedBox",
+}
+
+export enum DeviceWidgetKind {
+  SSID = "SSID",
+  PSK = "PSK",
 }
 
 export interface Board {
@@ -36,7 +68,7 @@ export interface TargetPrototype {
   boards: Board[];
 }
 
-export enum WidgetKind {
+export enum SensorWidgetKind {
   U8 = "U8",
   U16 = "U16",
   U32 = "U32",
@@ -50,7 +82,7 @@ export enum WidgetKind {
 export interface ConfigTypeScalar {
   name: string;
   widget: {
-    kind: WidgetKind;
+    kind: SensorWidgetKind;
     data: never;
   };
 }
@@ -58,7 +90,7 @@ export interface ConfigTypeScalar {
 export interface ConfigTypeSelection {
   name: string;
   widget: {
-    kind: WidgetKind.Selection;
+    kind: SensorWidgetKind.Selection;
     data: string[];
   };
 }
@@ -76,7 +108,7 @@ export enum MeasurementKind {
   AirTemperature = "AirTemperature",
   AirHumidity = "AirHumidity",
   SoilTemperature = "SoilTemperature",
-  SoilMoisture = "SoilMoisture"
+  SoilMoisture = "SoilMoisture",
 }
 
 export enum MeasurementType {
@@ -85,7 +117,7 @@ export enum MeasurementType {
   RawAnalogRead = "RawAnalogRead",
   Heap = "Heap",
   Stack = "Stack",
-  Unknown = "Unknown"
+  Unknown = "Unknown",
 }
 
 export interface Measurement {
@@ -180,12 +212,12 @@ export interface DevicePanic {
   createdAt: string;
 }
 
-export interface Dataset {
-  label: string;
-  yAxisID?: string;
-  backgroundColor: string;
-  data: number[];
-}
+//export interface Dataset {
+//  label: string;
+//  yAxisID?: string;
+//  backgroundColor: string;
+//  data: number[];
+//}
 
 export interface Firmware {
   id: number;

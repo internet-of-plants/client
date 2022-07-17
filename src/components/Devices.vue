@@ -6,7 +6,7 @@
       <router-link
         :to="`/organization/${organizationId}/collection/${collection.id}/device/${d.id}`"
       >
-        <DeviceCard :device="d" :organization-id="parseOrganizationId" :collection-id="colllection.id" />
+        <DeviceCard :device="d" :organization-id="parseOrganizationId" :collection-id="collection.id" />
       </router-link>
     </div>
   </div>
