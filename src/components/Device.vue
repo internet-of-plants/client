@@ -1,57 +1,62 @@
 <template>
-  <div class="flex flex-col items-center m-10">
-    <button class="right" @click="editing = !editing">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-5 w-5"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path
-          d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
+  <div class="flex panel">
+    <div class="flex flex-row m-10">
+      <div class="flex flex-col items-center m-10">
+        <button class="right" @click="editing = !editing">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
+            />
+            <path
+              fill-rule="evenodd"
+              d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
+
+        <DeviceMetadata
+          v-if="device"
+          :organization-id="parseOrganizationId"
+          :collection-id="parseCollectionId"
+          :editing="editing"
+          :device="device"
         />
-        <path
-          fill-rule="evenodd"
-          d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-          clip-rule="evenodd"
+
+        <Panics
+          v-if="panics && device"
+          :panics="panics"
+          :organization-id="parseOrganizationId"
+          :collection-id="parseCollectionId"
+          :device-id="device.id"
         />
-      </svg>
-    </button>
 
-    <DeviceMetadata
-      v-if="device"
-      :organization-id="parseOrganizationId"
-      :collection-id="parseCollectionId"
-      :editing="editing"
-      :device="device"
-    />
+        <Upload
+          v-if="device"
+          :organization-id="parseOrganizationId"
+          :collection-id="parseCollectionId"
+          :device="device"
+          :editing="editing"
+          @refresh="load"
+        />
 
-    <Panics
-      v-if="panics && device"
-      :panics="panics"
-      :organization-id="parseOrganizationId"
-      :collection-id="parseCollectionId"
-      :device-id="device.id"
-    />
-
-    <Upload
-      v-if="device"
-      :organization-id="parseOrganizationId"
-      :collection-id="parseCollectionId"
-      :device="device"
-      :editing="editing"
-      @refresh="load"
-    />
-
-    <Logs v-if="logs" :logs="logs" />
-
-    <EventHistory
-      v-if="device"
-      :device="device"
-      :organization-id="parseOrganizationId"
-      :collection-id="parseCollectionId"
-      :show-stale="(device.compiler?.sensors?.length ?? 0) == 0"
-    />
+        <EventHistory
+          v-if="device"
+          :device="device"
+          :organization-id="parseOrganizationId"
+          :collection-id="parseCollectionId"
+          :show-stale="(device.compiler?.sensors?.length ?? 0) == 0"
+        />
+      </div>
+      <div class="log-panel text-left">
+        <Logs v-if="logs" :logs="logs" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -104,8 +109,7 @@ onMounted(async () => {
   await load();
 
   logs.value = await LogService.list({
-    organizationId,
-    collectionId,
+    limit: 200,
     deviceId,
   });
 
@@ -131,5 +135,14 @@ body {
   width: 100%;
   padding: 0;
   margin: 0;
+}
+.log-panel {
+  height: 20em;
+  width: 20vw;
+  overflow: auto;
+}
+.panel {
+  width: 40vw;
+  margin-left: 30vw;
 }
 </style>
