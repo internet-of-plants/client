@@ -16,7 +16,7 @@ import OrganizationService from "@/api/organization";
 import { onMounted, ref } from "vue";
 import router from "@/router";
 
-const organizations = ref(undefined); 
+const organizations = ref(undefined);
 onMounted(async () => {
   organizations.value = await OrganizationService.list();
   if (organizations.value.length === 1) {

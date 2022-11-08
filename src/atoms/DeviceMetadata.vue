@@ -83,7 +83,7 @@ const props = defineProps<{
 
 const deviceName = ref(props.device.name);
 watch(props.device, (device) => {
-  deviceName.value = device.name; 
+  deviceName.value = device.name;
 });
 
 const saveName = async () => {
