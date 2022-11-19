@@ -3,7 +3,7 @@
     <h3 v-if="!props.device.compiler">
       <i>
         <p>Device not configured, add a target and sensors</p>
-        <p>To properly monitor events and provider automatic updates</p>
+        <p>To properly monitor events and provide automatic updates</p>
       </i>
     </h3>
     <template v-if="targets">
@@ -28,8 +28,8 @@
       <div class="flex flex-row">
         <div class="flex flex-col">
           <span
-            v-for="[index, newSensor] in alignedNewSensors"
-            :key="index"
+            v-for="([index, newSensor], i) in alignedNewSensors"
+            :key="`${i}-${index}`"
             @click.capture="
               if (!(props.editing && newSensor.color !== null)) {
                 $event.preventDefault();
@@ -49,8 +49,8 @@
 
         <div class="flex flex-col">
           <span
-            v-for="[index, newSensor] in alignedNewSensors"
-            :key="index"
+            v-for="([index, newSensor], i) in alignedNewSensors"
+            :key="`${i}-${index}`"
             class="mb-2"
           >
             <select
@@ -58,7 +58,7 @@
               v-model="newSensor.prototypeId"
               @change="
                 newSensor.alias = sensorPrototype($event.target.value)?.name;
-                addSensor(newSensor, $event.target.value);
+                addSensor($event.target.value);
               "
               class="mr-5"
             >
@@ -83,8 +83,8 @@
 
         <div class="flex flex-col">
           <span
-            v-for="[index, newSensor] in alignedNewSensors"
-            :key="index"
+            v-for="([index, newSensor], i) in alignedNewSensors"
+            :key="`${i}-${index}`"
             class="mb-2"
           >
             <input
@@ -100,13 +100,14 @@
         </div>
 
         <span class="flex flex-col">
-          <label
+          <span
             v-for="[index, request] in alignedSensorConfigRequests"
             :key="`${index}-${request.id}`"
-            class="flex flex-row mr-2 mb-2"
+            class="mb-2"
           >
-            {{ request.humanName }}
-          </label>
+            <span v-if="request.ty !== null">{{ request.humanName }}</span>
+            <span v-else></span>
+          </span>
         </span>
 
         <span class="flex flex-col ml-2">
@@ -115,50 +116,15 @@
             :key="`${index}-${request.id}`"
             class="mb-2"
           >
-            <span v-if="props.editing">
-              <template
-                v-if="
-                  [
-                    SensorWidgetKind.U8,
-                    SensorWidgetKind.U16,
-                    SensorWidgetKind.U32,
-                    SensorWidgetKind.U64,
-                    SensorWidgetKind.F32,
-                    SensorWidgetKind.F64,
-                  ].includes(request.ty.widget.kind)
-                "
-              >
-                <input v-model="sensorConfigs[`${index}-${request.id}`]" />
-              </template>
-              <template
-                v-else-if="request.ty.widget.kind === SensorWidgetKind.String"
-              >
-                <input v-model="sensorConfigs[`${index}-${request.id}`]" />
-              </template>
-              <template
-                v-else-if="
-                  request.ty.widget.kind === SensorWidgetKind.Selection
-                "
-              >
-                <select v-model="sensorConfigs[`${index}-${request.id}`]">
-                  <option value=""></option>
-                  <option
-                    v-for="opt in request.ty.widget.data"
-                    :key="opt"
-                    :value="opt"
-                  >
-                    {{ opt }}
-                  </option>
-                </select>
-              </template>
-            </span>
-            <span v-else>{{ sensorConfigs[`${index}-${request.id}`] }}</span>
+            <SensorWidgets v-if="request.ty !== null" :editing="props.editing" :widget="request.ty.widget" v-model="sensorConfigs[`${index}-${request.id}`]" />
+            <button v-else-if="props.editing" @click="addToMap(index, request.id);">Add</button>
+            <span v-else></span>
           </span>
         </span>
       </div>
 
       <div v-if="targets && target">
-        <strong>Device Configurations:</strong>
+        <strong>New Device Configurations:</strong>
         <div class="flex flex-row">
           <div class="flex flex-col">
             <span
@@ -185,7 +151,20 @@
                 <template v-if="request.ty.widget === DeviceWidgetKind.PSK">
                   <input v-model="deviceConfigs[request.id]" />
                 </template>
+                <template v-if="request.ty.widget === DeviceWidgetKind.Timezone">
+                  <select v-model="deviceConfigs[request.id]">
+                    <option value=""></option>
+                    <option
+                      v-for="index in 24"
+                      :key="index - 12"
+                      :value="`${index - 12}`"
+                    >
+                      UTC{{ index > 12 ? "+" : "" }}{{ index === 12 ? "" : index - 12 }}
+                    </option>
+                  </select>
+                </template>
               </span>
+              <span v-else-if="request.ty.widget === DeviceWidgetKind.Timezone">UTC{{ deviceConfigs[request.id] > 0 ? "+" : "" }}{{ deviceConfigs[request.id] }}</span>
               <span v-else>{{ deviceConfigs[request.id] }}</span>
             </span>
           </div>
@@ -216,8 +195,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
-import { Device, SensorWidgetKind, DeviceWidgetKind } from "@/models";
+import { onMounted, ref, computed, toRef } from "vue";
+import { Device, DeviceWidgetKind, SensorWidgetKind } from "@/models";
+import SensorWidgets from "@/atoms/SensorWidgets";
 import TargetService from "@/api/target";
 import CompilerService from "@/api/compiler";
 import SensorPrototypeService from "@/api/sensor_prototype";
@@ -252,17 +232,7 @@ propSensorIds.push({
 });
 
 const newSensors = ref(propSensorIds);
-const sensorConfigs = ref(
-  Object.entries(props.device.compiler?.sensors ?? [])
-    .flatMap(([index, s]) => s.configurations.map((c) => [index, c]))
-    .reduce(
-      (acc, [index, val]) => ({
-        ...acc,
-        [`${index}-${val.requestId}`]: ref(val.value),
-      }),
-      {}
-    )
-);
+const sensorConfigs = ref([]);
 const deviceConfigs = ref(
   (props.device.compiler?.deviceConfigs ?? []).reduce(
     (acc, val) => ({
@@ -315,15 +285,32 @@ const saveAlias = async (alias: string, sensorId?: number) => {
   emit("refresh");
 };
 
+const addToMap = (index: number, requestId: number) => {
+  sensorConfigs.value[`${index}-${requestId}`].push({ key: null, value: null });
+}
+
 const alignedNewSensors = computed(() => {
   return Object.entries(newSensors.value).flatMap(([index, newSensor]) => {
-    const requests =
-      sensorPrototype(newSensor.prototypeId)?.configurationRequests.map(() => ({
-        prototypeId: null,
-        alias: null,
-        color: null,
-        sensorId: undefined,
-      })) ?? [];
+    const prototype = sensorPrototype(newSensor.prototypeId);
+    const requests = prototype?.configurationRequests.map(() => ({
+      prototypeId: null,
+      alias: null,
+      color: null,
+      sensorId: undefined,
+    })) ?? [];
+
+    for (const request of prototype?.configurationRequests ?? []) {
+      if (Array.isArray(sensorConfigs.value[`${index}-${request.id}`])) {
+        sensorConfigs.value[`${index}-${request.id}`].forEach(() => {
+          requests.push({
+            prototypeId: null,
+            alias: null,
+            color: null,
+            sensorId: undefined,
+          });
+        });
+      }
+    }
     requests[0] = newSensor;
     return requests.map((request) => [index, request]);
   });
@@ -331,16 +318,51 @@ const alignedNewSensors = computed(() => {
 
 const alignedSensorConfigRequests = computed(() => {
   return Object.entries(newSensors.value).flatMap(([index, newSensor]) => {
-    const requests =
-      sensorPrototype(newSensor.prototypeId)?.configurationRequests ?? [];
+    const prototype = sensorPrototype(newSensor.prototypeId);
+    const requests = [];
+    for (const request of prototype?.configurationRequests ?? []) {
+      requests.push(request);
+      if (Array.isArray(sensorConfigs.value[`${index}-${request.id}`])) {
+        requests.push({
+          id: request.id,
+          name: null,
+          humanName: null,
+          secretAlgo: null,
+          ty: null,
+        });
+      }
+    }
     return requests.map((request) => [index, request]);
   });
 });
 
-const addSensor = () => {
+const addSensor = (value) => {
   newSensors.value = newSensors.value.filter(
-    (s) => s.prototypeId !== undefined
+    (s) => {
+      return s.prototypeId !== undefined || s.prototypeId === "";
+    }
   );
+
+  const sensor = sensorPrototype(value);
+  for (const request of sensor.configurationRequests) {
+    if (sensorConfigs.value[`${newSensors.value.length - 1}-${request.id}`] === undefined) {
+      sensorConfigs.value[`${newSensors.value.length - 1}-${request.id}`] = ref(null);
+    }
+
+    const queue = [{ request: request.ty.widget, config: toRef(sensorConfigs.value, `${newSensors.value.length - 1}-${request.id}`) }];
+    let element;
+
+    while (queue.length > 0) {
+      element = queue.shift();
+
+      if (element.request.kind === SensorWidgetKind.Map) {
+        element.config.value = [{ key: ref(null), value: ref(null) }];
+        queue.push({ request: element.request.data[0], config: toRef(element.config.value[0], "key") });
+        queue.push({ request: element.request.data[1], config: toRef(element.config.value[0], "value") });
+      }
+    }
+  }
+
   newSensors.value.push({
     prototypeId: ref(undefined),
     alias: ref(undefined),
@@ -426,6 +448,44 @@ const fetchSensorPrototypes = async (targetId: number) => {
   sensorPrototypes.value = undefined;
   const s = await SensorPrototypeService.listForTarget(targetId);
   sensorPrototypes.value = s;
+  
+  sensorConfigs.value = Object.entries(props.device.compiler?.sensors ?? [])
+    .flatMap(([index, s]) => s.configurations.map((c) => [index, c]))
+    .reduce(
+      (acc, [index, val]) => {
+        let value = val.value;
+
+        const request = sensorPrototypes.value.flatMap((s) => s.configurationRequests).find((c) => c.id === val.requestId);
+        if (request.ty.widget.kind === SensorWidgetKind.Map) {
+          // Note: This sucks
+          const elements = value.slice(1, value.length - 1).split("std::make_pair(").map((el) => el.trim()).filter((el) => el !== "");
+          value = [];
+          for (const element of elements) {
+            element = element.slice(0, element.length - 1 - element.endsWith(","));
+            const open = [];
+            for (let index = 0; index < element.length; ++index) {
+              if (element[index] === "," && open.length === 0) {
+                value.push({ key: element.slice(0, index).trim(), value: element.slice(index + 1).trim() });
+                break;
+              } else if (["[", "(", "{"].includes(element[index])) {
+                open.push(element[index]);
+              } else if (["]", ")", "}"].includes(element[index])) {
+                const opened = open.pop();
+                if (!((opened === "[" && element[index] === "]") || (opened === "(" && element[index] === ")") || (opened === "{" && element[index] === "}"))) {
+                  throw new Error("invalid c++");
+                }
+              }
+            }
+          }
+        }
+        
+        return {
+          ...acc,
+          [`${index}-${val.requestId}`]: ref(value),
+        };
+      },
+      {}
+    )
 };
 
 if (target.value) fetchSensorPrototypes(target.value);

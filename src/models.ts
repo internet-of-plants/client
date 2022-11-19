@@ -55,6 +55,7 @@ export enum SecretAlgo {
 export enum DeviceWidgetKind {
   SSID = "SSID",
   PSK = "PSK",
+  Timezone = "Timezone",
 }
 
 export interface Board {
@@ -77,6 +78,8 @@ export enum SensorWidgetKind {
   F64 = "F64",
   String = "String",
   Selection = "Selection",
+  Moment = "Moment",
+  Map = "Map",
 }
 
 export interface ConfigTypeScalar {
@@ -95,7 +98,23 @@ export interface ConfigTypeSelection {
   };
 }
 
-export type ConfigType = ConfigTypeSelection | ConfigTypeScalar;
+export interface ConfigTypeMoment {
+  name: string;
+  widget: {
+    kind: SensorWidgetKind.Moment;
+    data: string;
+  };
+}
+
+export interface ConfigTypeMap {
+  name: string;
+  widget: {
+    kind: SensorWidgetKind.Map;
+    data: [ConfigType, ConfigType];
+  };
+}
+
+export type ConfigType = ConfigTypeSelection | ConfigTypeScalar | ConfigTypeMoment | ConfigTypeMap;
 
 export interface ConfigRequest {
   id: number;
