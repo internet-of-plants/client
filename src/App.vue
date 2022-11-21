@@ -1,5 +1,5 @@
 <template>
-  <div id="nav" class="mt-5">
+  <div id="nav" class="pt-5">
     <router-link v-if="useRoute().path === '/'" class="link text-xl" to="/">All Organizations</router-link>
     <!--<router-link class="link" to="/sensor/prototypes">Sensor Prototypes</router-link>-->
     <!--<router-link class="link" to="/target/prototypes">Target Prototypes</router-link>-->
@@ -25,10 +25,18 @@ import { useRoute } from "vue-router";
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  background-color: #DFDFDF;
+  color: #626262;
+  height: 100vw;
+  padding: 0;
+  margin: 0;
 }
-
+input {
+  background-color: #DFDFDF;
+  border: solid 1px #626262;
+  border-radius: 3px;
+  padding-left: 5px;
+}
 .link {
   padding: 30px;
   text-align: center;

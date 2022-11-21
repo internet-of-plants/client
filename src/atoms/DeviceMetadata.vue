@@ -1,21 +1,6 @@
 <template>
-  <div v-if="props.device" class="flex">
+  <div v-if="props.device" class="flex box">
     <div class="flex flex-col">
-      <strong
-        v-if="props.device.name && !props.editing"
-        :title="`Device's MAC address: ${props.device.mac}`"
-        class="text-2xl text-center"
-      >
-        {{ deviceName }}
-      </strong>
-      <input
-        v-else-if="props.device.name && props.editing"
-        v-model="deviceName"
-        :title="`Device's MAC address: ${props.device.mac}`"
-        class="text-2xl text-center"
-        type="text"
-        @blur="saveName()"
-      />
       <p v-if="props.device.description">
         <b>Description: </b>{{ props.device.description }}
       </p>
@@ -26,8 +11,7 @@
             props.device.lastEvent.measurements
           )"
           :key="key"
-          :title="humanName(key)"
-          class="flex flex-col m-2"
+          class="flex flex-col m-2 text-center"
         >
           <img
             v-if="metadata(key)?.kind === MeasurementKind.SoilTemperature"
@@ -49,9 +33,9 @@
             class="w-16 h-16 p-3.5 self-center"
             src="/air-humidity.png"
           />
-          <span class="text-center text-xl"
-            >{{ Math.trunc(value, 2) }}{{ unit(key) }}</span
-          >
+          <span class="text-center text-xl">
+            {{ Math.trunc(value, 2) }}{{ unit(key) }}
+          </span>
           <pre>{{humanName(key)}}</pre>
           <span
             v-if="
@@ -69,10 +53,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
 import Time from "@/atoms/Time.vue";
 import { Device, MeasurementType, MeasurementKind } from "@/models";
-import DeviceService from "@/api/device";
 
 const props = defineProps<{
   organizationId: number;
@@ -80,22 +62,6 @@ const props = defineProps<{
   device: Device;
   editing: boolean;
 }>();
-
-const deviceName = ref(props.device.name);
-watch(props.device, (device) => {
-  deviceName.value = device.name;
-});
-
-const saveName = async () => {
-  if (deviceName.value === props.device.name) return;
-
-  await DeviceService.setName({
-    organizationId: props.organizationId,
-    collectionId: props.collectionId,
-    deviceId: props.device.id,
-    name: deviceName.value,
-  });
-};
 
 const alias = (name: string): string | undefined => {
   return props.device.compiler?.sensors?.find((s) =>
@@ -111,7 +77,7 @@ const humanName = (name: string) => {
   if (metadata) {
     const humanName = metadata.humanName;
     const sensorAlias = alias(metadata.name);
-    return sensorAlias ? `${sensorAlias}\n${humanName}` : humanName;
+    return sensorAlias ? `${humanName}\n${sensorAlias}` : humanName;
   } else {
     return name;
   }
@@ -136,3 +102,10 @@ const unit = (name: string) => {
   }
 };
 </script>
+<style lang="scss" scoped>
+.box {
+  border: solid 1px #626262;
+  padding: 25px;
+  height: min-content;
+}
+</style>
