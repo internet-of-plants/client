@@ -33,7 +33,7 @@
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Map">
         <span v-for="(m, index) in model" :key="m.key" class="flex">
-          <SensorWidgets :editing="props.editing" :widget="props.widget.data[0]" v-model="m.key" class="map" />
+          <SensorWidgets :editing="false" :widget="props.widget.data[0]" v-model="m.key" class="map" />
           <SensorWidgets :editing="props.editing" :widget="props.widget.data[1]" v-model="m.value" />
           <button class="ml-2 slot" @click="removeFromMap(index)">Delete</button>
         </span>
@@ -108,8 +108,6 @@ const model = computed({
 
 const addToMap = () => {
   duplicatedKey.value = model.value.find((el) => el.key === newElement?.value) ?? false;
-  console.log(duplicatedKey.value)
-  console.log(newElement.value)
   if (newElement.value !== null && !duplicatedKey.value) {
     model.value.push({ key: newElement.value, value: null });
   }

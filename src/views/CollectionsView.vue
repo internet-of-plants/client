@@ -1,7 +1,5 @@
 <template>
-  <div class="collections-view">
-    <Collections/>
-  </div>
+  <Collections/>
 </template>
 
 <script setup lang="ts">

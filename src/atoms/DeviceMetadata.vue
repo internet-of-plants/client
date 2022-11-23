@@ -5,7 +5,7 @@
         <b>Description: </b>{{ props.device.description }}
       </p>
 
-      <div v-if="props.device.lastEvent" class="flex flex-row flex-wrap justify-center w-full">
+      <div v-if="props.device.lastEvent" class="flex flex-row flex-wrap justify-center w-full measurements">
         <span
           v-for="([key, value], index) in Object.entries(
             props.device.lastEvent.measurements
@@ -107,5 +107,8 @@ const unit = (name: string) => {
   border: solid 1px #626262;
   padding: 25px;
   height: min-content;
+}
+.measurements {
+  max-width: 27vw;
 }
 </style>

@@ -51,18 +51,19 @@
 
           <span class="flex flex-col">
             <DeviceMetadata
-              v-if="device"
+              v-if="device?.lastEvent?.measurements"
               :organization-id="parseOrganizationId"
               :collection-id="parseCollectionId"
               :editing="editing"
               :device="device"
+              class="mb-7"
             />
-            <Logs v-if="logs" :logs="logs" class="box log-panel mt-7" />
+            <Logs v-if="logs.length > 0" :logs="logs" class="box log-panel" />
           </span>
         </span>
 
         <Panics
-          v-if="panics && device"
+          v-if="panics.length > 0 && device"
           :panics="panics"
           :organization-id="parseOrganizationId"
           :collection-id="parseCollectionId"
@@ -114,8 +115,8 @@ try {
 }
 
 const device = ref(undefined);
-const logs = ref(undefined);
-const panics = ref(undefined);
+const logs = ref([]);
+const panics = ref([]);
 const deviceName = ref(undefined);
 
 const load = async () => {

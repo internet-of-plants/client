@@ -1,7 +1,5 @@
 <template>
-  <div class="device-view">
-    <Device/>
-  </div>
+  <Device/>
 </template>
 
 <script setup lang="ts">

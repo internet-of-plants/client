@@ -1,7 +1,5 @@
 <template>
-  <div class="signup-view">
-    <Signup/>
-  </div>
+  <Signup/>
 </template>
 
 <script setup lang="ts">

@@ -1,7 +1,5 @@
 <template>
-  <div class="organizations-view">
-    <Organizations/>
-  </div>
+  <Organizations/>
 </template>
 
 <script setup lang="ts">
