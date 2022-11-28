@@ -8,6 +8,7 @@ export async function get<T>(
   const token = localStorage.getItem("token") ?? undefined;
   if (token === undefined) {
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event('storage'))
     router.push({ path: "/login" });
     throw new Error("not authenticated");
   }
@@ -27,6 +28,7 @@ export async function get<T>(
   });
   if (response.status === 401) {
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event('storage'))
     router.push({ path: "/login" });
     throw new Error("not authenticated");
   }
@@ -39,6 +41,7 @@ export async function post<T>(route: string, body?: Body): Promise<T> {
   const token = localStorage.getItem("token") ?? undefined;
   if (token === undefined) {
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event('storage'))
     router.push({ path: "/login" });
     throw new Error("not authenticated");
   }
@@ -58,6 +61,7 @@ export async function post<T>(route: string, body?: Body): Promise<T> {
   });
   if (response.status === 401) {
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event('storage'))
     router.push({ path: "/login" });
     throw new Error("not authenticated");
   }

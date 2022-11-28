@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, onMounted, onUnmounted } from "vue";
 import '@/tailwind.css';
 import { useRoute } from "vue-router";
 
@@ -58,9 +58,12 @@ const selected = (route) => {
   return [];
 };
 
-const isAuthenticated = computed(() => {
-  return !!localStorage.getItem("token");
-});
+const isAuthenticated = ref(!!localStorage.getItem("token"));
+const updateAuthenticated = () => {
+  isAuthenticated.value = !!localStorage.getItem("token");
+};
+onMounted(() => window.addEventListener("storage", updateAuthenticated));
+onUnmounted(() => window.removeEventListener("storage", updateAuthenticated));
 </script>
 
 <style lang="scss">

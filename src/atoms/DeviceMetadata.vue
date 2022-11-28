@@ -1,6 +1,6 @@
 <template>
   <div v-if="props.device" class="flex box">
-    <div class="flex flex-col">
+    <div class="flex flex-col w-full">
       <p v-if="props.device.description">
         <b>Description: </b>{{ props.device.description }}
       </p>
@@ -36,13 +36,13 @@
           <span class="text-center text-xl">
             {{ Math.trunc(value, 2) }}{{ unit(key) }}
           </span>
-          <pre>{{humanName(key)}}</pre>
+          <p class="text-center" v-for="line in humanName(key).split('\n')" :key="line">{{line}}</p>
           <span
             v-if="
               index ===
               Object.keys(props.device.lastEvent.measurements).length - 1
             "
-            class="text-xs"
+            class="text-xs text-right"
           >
             <Time :moment="props.device.lastEvent.createdAt" />
           </span>

@@ -2,6 +2,8 @@ export interface Compiler {
   id: number;
   sensors: Sensor[];
   deviceConfigs: DeviceConfig[];
+  collectionName: string;
+  devicesCount: number;
   target: Target;
   latestFirmware: Firmware;
 }
@@ -15,7 +17,6 @@ export interface DeviceConfig {
 
 export interface Compilation {
   id: number;
-  compiler: Compiler;
   platformioIni: string;
   mainCpp: string;
   pinHpp: string;

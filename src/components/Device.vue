@@ -2,47 +2,13 @@
   <div class="w-full flex justify-center">
     <div class="flex flex-row">
       <div class="flex flex-col items-center">
-        <span class="flex">
-          <p
-            v-if="device?.name && !editing"
-            :title="`Device's MAC address: ${device.mac}`"
-            class="text-3xl text-center"
-          >
-            {{ deviceName }}
-          </p>
-          <input
-            v-else-if="device?.name && editing"
-            v-model="deviceName"
-            :title="`Device's MAC address: ${device.mac}`"
-            class="text-2xl text-center"
-            type="text"
-            @blur="saveName()"
-          />
-          
-          <button class="right ml-2" @click="editing = !editing">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
-              />
-              <path
-                fill-rule="evenodd"
-                d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
-        </span>
+        <Name v-model="deviceName" :title="`Device's MAC address: ${device?.mac}`" @blur="saveName()" @toggle-edit="editing = $event" />
 
         <span class="flex mt-5">
           <Upload
-            v-if="device"
-            :organization-id="parseOrganizationId"
-            :collection-id="parseCollectionId"
+            v-if="device && collection"
+            :organization-id="parseOrganizationId" 
+            :collection="collection"
             :device="device"
             :editing="editing"
             @refresh="load"
@@ -87,6 +53,7 @@ import { useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
 import Logs from "@/atoms/Logs.vue";
 import Panics from "@/atoms/Panics.vue";
+import Name from "@/atoms/Name.vue";
 import DeviceMetadata from "@/atoms/DeviceMetadata.vue";
 import EventHistory from "@/components/EventHistory.vue";
 import Upload from "@/atoms/Upload.vue";
@@ -95,6 +62,7 @@ import router from "@/router";
 import PanicService from "@/api/panic";
 import LogService from "@/api/log";
 import DeviceService from "@/api/device";
+import CollectionService from "@/api/collection";
 
 const editing = ref(false);
 
@@ -114,13 +82,28 @@ try {
   router.push({ path: `/organization/${organizationId}` });
 }
 
+const collection = ref(undefined);
 const device = ref(undefined);
 const logs = ref([]);
 const panics = ref([]);
-const deviceName = ref(undefined);
+const deviceName = ref(null);
 
 const load = async () => {
   device.value = await DeviceService.find({
+    organizationId,
+    collectionId,
+    deviceId,
+  });
+  collection.value = await CollectionService.find({
+    organizationId,
+    collectionId,
+  });
+  logs.value = await LogService.list({
+    limit: 200,
+    deviceId,
+  });
+
+  panics.value = await PanicService.list({
     organizationId,
     collectionId,
     deviceId,
@@ -140,20 +123,7 @@ const saveName = async () => {
   });
 };
 
-onMounted(async () => {
-  await load();
-
-  logs.value = await LogService.list({
-    limit: 200,
-    deviceId,
-  });
-
-  panics.value = await PanicService.list({
-    organizationId,
-    collectionId,
-    deviceId,
-  });
-});
+onMounted(load);
 </script>
 
 <style scoped lang="scss">

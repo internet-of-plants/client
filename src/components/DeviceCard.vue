@@ -41,13 +41,13 @@
         <span class="text-center text-xl"
           >{{ Math.trunc(value, 2) }}{{ unit(key) }}</span
         >
-        <pre>{{humanName(key)}}</pre>
+        <p class="text-center" v-for="line in humanName(key).split('\n')" :key="line">{{line}}</p>
         <span
           v-if="
             index ===
             Object.keys(props.device.lastEvent.measurements).length - 1
           "
-          class="text-xs"
+          class="text-xs text-right"
         >
           <Time :moment="props.device.lastEvent.createdAt" />
         </span>
@@ -60,6 +60,12 @@
 
     <p v-if="!props.device.lastEvent">
       Updated at <Time :moment="props.device.updatedAt" />
+    </p>
+
+    <p v-if="props.device.compiler.latestFirmware.hash !== props.device.firmware.hash"
+      :title="`Current Firmware MD5: ${props.device.firmware.hash}\nUpdate's Firmware MD5: ${props.device.compiler.latestFirmware.hash}`"
+    >
+      Update Available
     </p>
   </div>
 </template>
@@ -76,7 +82,7 @@ const props = defineProps<{
 }>();
 
 const deviceName = ref(props.device.name);
-watch(props.device, (device) => {
+watch(() => props.device, (device) => {
   deviceName.value = device.name;
 });
 

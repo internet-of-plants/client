@@ -28,7 +28,7 @@ const model = computed({
   set(value) {
     emit("update:modelValue", `relay::Moment(${value?.hours ?? 0}, ${value?.minutes ?? 0}, ${value?.seconds ?? 0})`);
   }
-})
+});
 </script>
 
 <style lang="scss">

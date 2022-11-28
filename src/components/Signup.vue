@@ -40,6 +40,7 @@ const signup = async () => {
   });
   if (req.status === 200) {
     localStorage.setItem("token", await req.text());
+    window.dispatchEvent(new Event('storage'))
   }
   router.push({ path: "/" });
 };
