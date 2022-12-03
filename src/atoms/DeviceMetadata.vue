@@ -64,9 +64,9 @@ const props = defineProps<{
 }>();
 
 const alias = (name: string): string | undefined => {
-  return props.device.compiler?.sensors?.find((s) =>
+  return props.device.compiler?.sensors.find((s) =>
     s.measurements.find((m) => m.name === name)
-  )?.alias;
+  ).alias;
 };
 
 const humanName = (name: string) => {

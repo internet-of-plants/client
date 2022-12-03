@@ -1,25 +1,42 @@
 <template>
   <div class="w-full flex justify-center">
     <div class="flex flex-row">
-      <div class="flex flex-col items-center">
+      <div v-if="collection" class="flex flex-col items-center">
         <Name v-model="deviceName" :title="`Device's MAC address: ${device?.mac}`" @blur="saveName()" @toggle-edit="editing = $event" />
 
         <span class="flex mt-5">
           <Upload
-            v-if="device && collection"
+            v-if="device"
             :organization-id="parseOrganizationId" 
             :collection="collection"
-            :device="device"
+            :deviceId="device.id"
             :editing="editing"
             @refresh="load"
             class="mr-7"
-          />
+          >
+            <slot name="description">
+              <p v-if="device.firmware.hash === collection.compiler?.latestFirmware.hash">
+                <span class="text-lg">
+                  Firmware's MD5:
+                </span>
+                <span class="text-sm">
+                  {{ device.firmware.hash }}
+                </span>
+              </p>
+              <p
+                v-else-if="collection.compiler"
+                :title="`Current Firmware MD5: ${device.firmware.hash}\nUpdate's Firmware MD5: ${collection.compiler.latestFirmware.hash}`"
+              >
+                Update Available
+              </p>
+            </slot>
+          </Upload>
 
           <span class="flex flex-col">
             <DeviceMetadata
               v-if="device?.lastEvent?.measurements"
               :organization-id="parseOrganizationId"
-              :collection-id="parseCollectionId"
+              :collection-id="collection.id"
               :editing="editing"
               :device="device"
               class="mb-7"
@@ -32,7 +49,7 @@
           v-if="panics.length > 0 && device"
           :panics="panics"
           :organization-id="parseOrganizationId"
-          :collection-id="parseCollectionId"
+          :collection-id="collection.id"
           :device-id="device.id"
         />
 
@@ -40,8 +57,8 @@
           v-if="device"
           :device="device"
           :organization-id="parseOrganizationId"
-          :collection-id="parseCollectionId"
-          :show-stale="(device.compiler?.sensors?.length ?? 0) == 0"
+          :collection-id="collection.id"
+          :show-stale="(collection.compiler?.sensors.length ?? 0) == 0"
         />
       </div>
     </div>
@@ -50,7 +67,7 @@
 
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import Logs from "@/atoms/Logs.vue";
 import Panics from "@/atoms/Panics.vue";
 import Name from "@/atoms/Name.vue";
@@ -75,25 +92,13 @@ try {
   router.push({ path: "/" });
 }
 
-let parseCollectionId;
-try {
-  parseCollectionId = parseInt(collectionId);
-} catch (_err) {
-  router.push({ path: `/organization/${organizationId}` });
-}
-
 const collection = ref(undefined);
-const device = ref(undefined);
+const device = computed(() => collection.value?.devices.find((d) => `${d.id}` === deviceId));
 const logs = ref([]);
 const panics = ref([]);
 const deviceName = ref(null);
 
 const load = async () => {
-  device.value = await DeviceService.find({
-    organizationId,
-    collectionId,
-    deviceId,
-  });
   collection.value = await CollectionService.find({
     organizationId,
     collectionId,
@@ -117,7 +122,7 @@ const saveName = async () => {
 
   await DeviceService.setName({
     organizationId: parseOrganizationId,
-    collectionId: parseCollectionId,
+    collectionId: collection.value.id,
     deviceId: device.value.id,
     name: deviceName.value,
   });

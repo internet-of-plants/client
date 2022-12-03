@@ -2,7 +2,7 @@ import * as HTTP from "@/http";
 
 interface SetAliasContext {
   sensorId: number;
-  deviceId: number;
+  collectionId: number;
   alias: string;
 }
 
@@ -12,7 +12,7 @@ async function setAlias(ctx: SetAliasContext): Promise<void> {
 
 interface SetColorContext {
   sensorId: number;
-  deviceId: number;
+  collectionId: number;
   color: string;
 }
 

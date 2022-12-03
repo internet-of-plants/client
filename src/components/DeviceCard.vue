@@ -62,7 +62,7 @@
       Updated at <Time :moment="props.device.updatedAt" />
     </p>
 
-    <p v-if="props.device.compiler.latestFirmware.hash !== props.device.firmware.hash"
+    <p v-if="props.device.compiler && props.device.compiler.latestFirmware.hash !== props.device.firmware.hash"
       :title="`Current Firmware MD5: ${props.device.firmware.hash}\nUpdate's Firmware MD5: ${props.device.compiler.latestFirmware.hash}`"
     >
       Update Available
@@ -87,9 +87,9 @@ watch(() => props.device, (device) => {
 });
 
 const alias = (name: string): string | undefined => {
-  return props.device.compiler?.sensors?.find((s) =>
+  return props.device.compiler?.sensors.find((s) =>
     s.measurements.find((m) => m.name === name)
-  )?.alias;
+  ).alias;
 };
 
 const humanName = (name: string) => {

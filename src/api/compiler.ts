@@ -13,7 +13,8 @@ export interface NewSensor {
 }
 
 export interface NewCompiler {
-  deviceId: number;
+  collectionId: number;
+  deviceId: number | null;
   targetId: number;
   sensors: NewSensor[];
 }
@@ -23,10 +24,15 @@ export interface ListRequest {
   organizationId: number;
 }
 
-export interface SetCompiler {
+export interface SetDeviceCompiler {
   deviceId: number;
   compilerId: number;
 }
+export interface SetCollectionCompiler {
+  collectionId: number;
+  compilerId: number;
+}
+export type SetCompiler = SetCollectionCompiler | SetDeviceCompiler;
 
 async function create(request: NewCompiler) {
   await HTTP.post("/v1/compiler", request);

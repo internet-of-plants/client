@@ -202,6 +202,7 @@ export interface Collection {
   id: number;
   name: string;
   description: string | null;
+  compiler: Compiler | null;
   devices: Device[];
   createdAt: string;
   updatedAt: string;

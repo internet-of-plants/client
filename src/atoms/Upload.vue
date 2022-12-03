@@ -2,26 +2,13 @@
   <span class="box">  
     <span>
       <div class="mb-1 mt-2">
-        <p v-if="props.device.firmware.hash === props.device.compiler?.latestFirmware?.hash">
-          <span class="text-lg">
-            Firmware's MD5:
-          </span>
-          <span class="text-sm">
-            {{ props.device.firmware.hash }}
-          </span>
-        </p>
-        <p
-          v-else-if="props.device.compiler"
-          :title="`Current Firmware MD5: ${props.device.firmware.hash}\nUpdate's Firmware MD5: ${props.device.compiler.latestFirmware.hash}`"
-        >
-          Update Available
-        </p>
+        <slot name="description"></slot>
       </div>
 
-      <h3 v-if="!props.device.compiler">
+      <h3 v-if="!props.collection.compiler">
         <i>
-          <p class="text-center">Device not configured</p>
-          <p class="text-center">Enable edit mode and specify the device, configuring the integrations</p>
+          <p class="text-center">{{ props.deviceId ? 'Device' : 'Collection' }} not configured</p>
+          <p class="text-center">{{ !props.editing ? "Enable edit mode and specify" : "Specify" }} the setup, configuring the integrations</p>
         </i>
       </h3>
       
@@ -42,7 +29,7 @@
         </span>
       </span>
 
-      <div v-if="compilers" class="mt-2">
+      <div v-if="compilers?.length > 0" class="mt-2">
         <span v-if="props.editing">{{ compiler ? "" : "Inherit " }}Configurations From:</span>
         <select v-if="props.editing" v-model="compilerId" class="ml-2">
           <option v-if="compiler?.devicesCount > 1" value="">new</option>
@@ -198,15 +185,18 @@
       </div>
     </span>
 
-    <span class="flex justify-center pt-3">
-      <button v-if="customizeCompiler || (props.editing && compilerId !== props.device.compiler?.id)" @click="create()">Save</button>
+    <span v-if="customizeCompiler || (props.editing && compilerId !== props.collection.compiler?.id)" class="flex justify-center pt-3">
+      <button v-if="!loading" @click="create()">Save</button>
+      <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 loading">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+      </svg>
     </span>
   </span>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref, computed, toRef, watch } from "vue";
-import { Device, DeviceWidgetKind, SensorWidgetKind, Collection } from "@/models";
+import { DeviceWidgetKind, SensorWidgetKind, Collection } from "@/models";
 import SensorWidgets from "@/atoms/SensorWidgets";
 import TargetService from "@/api/target";
 import CompilerService from "@/api/compiler";
@@ -218,12 +208,13 @@ import "vue3-colorpicker/style.css";
 const props = defineProps<{
   organizationId: number;
   collection: Collection;
-  device: Device;
+  deviceId?: number;
   editing: boolean;
 }>();
 
 const emit = defineEmits(["refresh"]);
 
+const loading = ref(false);
 const targets = ref(undefined);
 const compilers = ref(undefined);
 const sensorPrototypes = ref(undefined);
@@ -233,9 +224,11 @@ const compiler = computed(() => {
   return compilers.value?.find((c) => c.id === compilerId.value);
 });
 
-const customizeCompiler = computed(() => props.editing && (compiler.value?.devicesCount === 1 || compilerId.value === ""));
+const customizeCompiler = computed(() => {
+  return props.editing && (compiler.value?.devicesCount === 1 || compilerId.value === "");
+});
 
-const targetId = ref(props.device.compiler?.target.id);
+const targetId = ref(props.collection.compiler?.target.id);
 
 const target = computed(() => {
   return targets.value?.find((t) => t.id === targetId.value);
@@ -291,7 +284,7 @@ function buildDeviceConfigs() {
     .reduce((acc, val) => ({
       ...acc,
       [val.requestId]: ref(val.value),
-    }), {}) ?? {};
+    }), {});
   if (compilers.value && values === undefined) {
     return target.value?.configurationRequests.reduce(
         (acc, val) => ({
@@ -438,34 +431,43 @@ const addSensor = (value) => {
 };
 
 const create = async () => {
-  if (compilerId.value !== "" && compilerId.value !== props.device.compiler?.id) {
-    await CompilerService.set({
-      deviceId: props.device.id,
+  loading.value = true;
+  if (compilerId.value !== "" && compilerId.value !== props.collection.compiler?.id) {
+    const obj = {
       compilerId: compilerId.value,
-    });
+      deviceId: props.deviceId
+    };
+    if (!props.deviceId) obj.collectionId = props.collection.id;
+    await CompilerService.set(obj);
   } else {
     if (!target.value) throw new Error("missing target");
     const newCompiler = {
       targetId: target.value.id,
       sensors: [],
       deviceConfigs: [],
-      deviceId: props.device.id,
+      deviceId: props.deviceId ?? null,
+      collectionId: props.collection.id,
     };
 
     for (const request of target.value.configurationRequests) {
       if ((deviceConfigs.value[request.id] ?? "") === "") {
+        loading.value = false;
         throw new Error(`missing config for ${request.name}`);
       }
 
       const value = deviceConfigs.value[request.id];
       switch (request.ty.widget) {
         case DeviceWidgetKind.SSID:
-          if (value.length > 32)
+          if (value.length > 32) {
+            loading.value = false;
             throw new Error(`SSID is too long: ${value}, max length is 32`);
+          }
           break;
         case DeviceWidgetKind.PSK:
-          if (value.length > 64)
+          if (value.length > 64) {
+            loading.value = false;
             throw new Error(`PSK is too long: ${value}, max length is 64`);
+          }
           break;
       }
 
@@ -479,12 +481,14 @@ const create = async () => {
       if (newSensor.prototypeId === null) continue;
 
       if (!sensorPrototype(newSensor.prototypeId)) {
+        loading.value = false;
         throw new Error(`invalid sensor configured: ${newSensor.prototypeId}`);
       }
 
       const configs = [];
       for (const request of sensorPrototype(newSensor.prototypeId).configurationRequests) {
         if ((sensorConfigs.value[`${index}-${request.id}`] ?? "") === "") {
+          loading.value = false;
           throw new Error(`missing config for ${request.name}`);
         }
         configs.push({
@@ -501,6 +505,7 @@ const create = async () => {
     await CompilerService.create(newCompiler);
   }
 
+  loading.value = false;
   emit("refresh");
 };
 
@@ -510,7 +515,7 @@ async function fetchCompilers(id) {
   } else {
     compilers.value = await CompilerService.list({ targetId: id, organizationId: props.organizationId });
   }
-  targetId.value = id;
+  targetId.value = parseInt(id);
 }
 
 async function fetchSensorPrototypes(targetId: number) {
@@ -564,7 +569,7 @@ const saveColor = async (color: string | null, sensorId?: number) => {
 
   await SensorService.setColor({
     sensorId,
-    deviceId: props.device.id,
+    deviceId: props.deviceId,
     color,
   });
 
@@ -585,14 +590,15 @@ const saveAlias = async (alias: string, sensorId?: number) => {
 
   await SensorService.setAlias({
     sensorId,
-    deviceId: props.device.id,
+    deviceId: props.deviceId,
     alias,
   });
 
   emit("refresh");
 };
 
-const updateTarget = async (id: number) => {
+const updateTarget = async (id: number | undefined) => {
+  if (!id) return;
   await fetchCompilers(id);
   newSensors.value = buildNewSensors();
   await fetchSensorPrototypes(id);
@@ -602,8 +608,8 @@ const updateTarget = async (id: number) => {
 
 const load = async () => {
   targets.value = await TargetService.list();
-  targetId.value = props.device.compiler?.target.id;
-  compilerId.value = props.device.compiler?.id;
+  targetId.value = props.collection.compiler?.target.id;
+  compilerId.value = props.collection.compiler?.id ?? "";
 };
 
 watch(() => props.device, load);
@@ -611,7 +617,7 @@ onMounted(load);
 
 watch(compilerId, async () => {
   if (!compiler.value) {
-    await updateTarget(props.device.compiler?.target.id);
+    await updateTarget(props.collection.compiler?.target.id);
   } else {
     await updateTarget(compiler.value?.target.id);
   }
@@ -660,5 +666,16 @@ select {
   border-radius: 3px;
   width: 100%;
   height: 26.5px !important;
+}
+.loading {
+  animation: rotation 2s infinite linear;
+}
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
 }
 </style>
