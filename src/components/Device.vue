@@ -14,22 +14,22 @@
             @refresh="load"
             class="mr-7"
           >
-            <slot name="description">
+            <template v-slot:description>
               <p v-if="device.firmware.hash === collection.compiler?.latestFirmware.hash">
-                <span class="text-lg">
-                  Firmware's MD5:
-                </span>
                 <span class="text-sm">
+                  Firmware's MD5:
                   {{ device.firmware.hash }}
                 </span>
               </p>
               <p
-                v-else-if="collection.compiler"
+                v-else-if="!!collection.compiler"
                 :title="`Current Firmware MD5: ${device.firmware.hash}\nUpdate's Firmware MD5: ${collection.compiler.latestFirmware.hash}`"
+                class="text-center"
               >
                 Update Available
               </p>
-            </slot>
+              <p v-else class="text-sm">Firmware's MD5: {{device.firmware.hash}}</p>
+            </template>
           </Upload>
 
           <span class="flex flex-col">
