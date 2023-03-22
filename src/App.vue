@@ -10,7 +10,7 @@
   <div class="content">
     <router-view />
   </div>
-  <div class="flex flex-col w-full footer">
+  <div class="flex flex-col w-full footer px-5">
     <a href="https://www.flaticon.com/free-icons/soil" title="soil icons">Soil icons created by Smashicons - Flaticon</a>
     <a href="https://www.flaticon.com/free-icons/hot" title="hot icons">Hot icons created by Freepik - Flaticon</a>
     <a href="https://www.flaticon.com/free-icons/evaporation" title="evaporation icons">Evaporation icons created by Smashicons - Flaticon</a>

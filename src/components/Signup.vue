@@ -1,25 +1,27 @@
 <template>
   <div class="signup flex w-full flex-row items-center">
     <div class="items-center flex flex-col w-full">
-      <div>
-        <label for="organization-name">Organization Name:</label>
-        <input type="text" name="organization-name" v-model="user.organizationName" />
+      <div class="border border-black rounded-sm p-5 flex flex-col">
+        <div>
+          <label for="organization-name">Organization Name:</label>
+          <input class="float-right ml-2" type="text" name="organization-name" v-model="user.organizationName" />
+        </div>
+        <div class="pt-1">
+          <label for="email">Email:</label>
+          <input class="float-right ml-2" type="text" name="email" v-model="user.email" />
+        </div>
+        <div class="pt-1">
+          <label for="username">Username:</label>
+          <input class="float-right ml-2" type="text" name="username" v-model="user.username" />
+        </div>
+        <div class="pt-1">
+          <label for="password">Password:</label>
+          <input class="float-right ml-2" type="password" name="password" v-model="user.password" />
+        </div>
+        <button class="mt-2" v-on:click="signup()">Signup</button>
       </div>
-      <div>
-        <label for="email">Email:</label>
-        <input type="text" name="email" v-model="user.email" />
-      </div>
-      <div>
-        <label for="username">Username:</label>
-        <input type="text" name="username" v-model="user.username" />
-      </div>
-      <div>
-        <label for="password">Password:</label>
-        <input type="password" name="password" v-model="user.password" />
-      </div>
-      <button v-on:click="signup()">Signup</button>
     </div>
-    </div>
+  </div>
 </template>
 
 <script setup lang="ts">

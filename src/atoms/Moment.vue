@@ -1,6 +1,6 @@
 <template>
   <Datepicker v-if="props.editing" ref="picker" v-model="model" inputClassName="timePickerButtonMoment" :clearable="false" enable-seconds auto-apply :close-on-auto-apply="false" timePicker />
-  <span v-else>{{`${model.hours ?? 0}`.padStart(2, "0")}}:{{`${model.minutes ?? 0}`.padStart(2, "0")}}:{{`${model.seconds ?? 0}`.padStart(2, "0")}}</span>
+  <span v-else>{{`${model.hours ?? 0}`.padStart(2, "0")}}h:{{`${model.minutes ?? 0}`.padStart(2, "0")}}m:{{`${model.seconds ?? 0}`.padStart(2, "0")}}s</span>
 </template>
 
 <script setup lang="ts">

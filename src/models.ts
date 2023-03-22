@@ -71,6 +71,7 @@ export interface TargetPrototype {
 }
 
 export enum SensorWidgetKind {
+  Seconds = "Seconds",
   U8 = "U8",
   U16 = "U16",
   U32 = "U32",

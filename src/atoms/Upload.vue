@@ -8,7 +8,7 @@
       <h3 v-if="!props.collection.compiler">
         <i>
           <p class="text-center">{{ props.deviceId ? 'Device' : 'Collection' }} not configured</p>
-          <p class="text-center">{{ !props.editing ? "Enable edit mode and specify" : "Specify" }} the setup, configuring the integrations</p>
+          <p class="text-center">{{ !props.editing ? "Enable edit mode and c" : "C" }}onfigure the integrations</p>
         </i>
       </h3>
       

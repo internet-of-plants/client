@@ -3,6 +3,16 @@
     <span v-if="props.editing" class="slot">
       <template
           v-if="[
+            SensorWidgetKind.Seconds,
+            SensorWidgetKind.U8,
+            SensorWidgetKind.U16,
+          ].includes(props.widget.kind)"
+      >
+        <input :value="model" @blur="emit('update:modelValue', $event.target.value)" class="slot mb-2" size="5" />
+      </template>
+      <template
+          v-else-if="[
+            SensorWidgetKind.Seconds,
             SensorWidgetKind.U8,
             SensorWidgetKind.U16,
             SensorWidgetKind.U32,
@@ -11,7 +21,10 @@
             SensorWidgetKind.F64,
           ].includes(props.widget.kind)"
       >
-        <input :value="model" @blur="emit('update:modelValue', $event.target.value)" class="slot mb-2" />
+        <input :value="model" @blur="emit('update:modelValue', $event.target.value)" class="slot mb-2" size="10" />
+      </template>
+      <template v-if="props.widget.kind === SensorWidgetKind.Seconds">
+      seconds
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.String">
         <input :value="model" @blur="emit('update:modelValue', $event.target.value)" class="slot mb-2" />
@@ -58,6 +71,9 @@
           ].includes(props.widget.kind)"
       >
         <p class="slot mb-2">{{model}}</p>
+      </template>
+      <template v-else-if="props.widget.kind === SensorWidgetKind.Seconds">
+        <p class="slot mb-2">{{model}} seconds</p>
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Moment">
         <Moment v-model="model" :editing="props.editing" class="slot mb-2" />
