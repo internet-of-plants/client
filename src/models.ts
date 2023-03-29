@@ -79,6 +79,7 @@ export enum SensorWidgetKind {
   F32 = "F32",
   F64 = "F64",
   String = "String",
+  Sensor = "Sensor",
   Selection = "Selection",
   Moment = "Moment",
   Map = "Map",
@@ -89,6 +90,14 @@ export interface ConfigTypeScalar {
   widget: {
     kind: SensorWidgetKind;
     data: never;
+  };
+}
+
+export interface ConfigTypeSensor {
+  name: string;
+  widget: {
+    kind: SensorWidgetKind.Sensor;
+    data: number;
   };
 }
 
@@ -116,7 +125,7 @@ export interface ConfigTypeMap {
   };
 }
 
-export type ConfigType = ConfigTypeSelection | ConfigTypeScalar | ConfigTypeMoment | ConfigTypeMap;
+export type ConfigType = ConfigTypeSelection | ConfigTypeScalar | ConfigTypeMoment | ConfigTypeMap | ConfigTypeSensor;
 
 export interface ConfigRequest {
   id: number;
@@ -163,7 +172,6 @@ export interface Sensor {
   color: string;
   dependencies: string[];
   includes: string[];
-  definitions: string[];
   setups: string[];
   configurations: Config[];
   prototype: SensorPrototype;
@@ -174,7 +182,6 @@ export interface SensorPrototype {
   name: string;
   dependencies: string[];
   includes: string[];
-  definitions: string[];
   setups: string[];
   configurationRequests: ConfigRequest[];
 }

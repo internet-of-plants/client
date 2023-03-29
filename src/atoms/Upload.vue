@@ -121,7 +121,6 @@
                 v-if="customizeCompiler && (newSensor.prototypeId !== null || i === alignedNewSensors.length - 1)"
                 v-model="newSensor.prototypeId"
                 @change="
-                  newSensor.alias = sensorPrototype($event.target.value)?.name;
                   addSensor($event.target.value);
                 "
                 class="mr-5 slot"
@@ -177,7 +176,7 @@
               v-for="[index, request] in alignedSensorConfigRequestValues"
               :key="`${index}-${request.id}`"
             >
-              <SensorWidgets v-if="request.ty !== null" :editing="customizeCompiler" :widget="request.ty.widget" v-model="sensorConfigs[`${index}-${request.id}`]" />              
+              <SensorWidgets v-if="request.ty !== null" :editing="customizeCompiler" :widget="request.ty.widget" v-model="sensorConfigs[`${index}-${request.id}`]" :new-sensors="newSensors" :sensor-prototypes="sensorPrototypes"/>
               <span v-else></span>
             </span>
           </span>
@@ -263,18 +262,24 @@ function defaultValue(widget: DeviceWidgetKind) {
   }
 }
 
+function randomPk() {
+    return Math.floor(Math.random() * 50000);
+}
+
 function buildNewSensors() {
   const list = compiler.value?.sensors.map((s) => ({
+    localPk: randomPk(),
     prototypeId: ref(s.prototype.id),
     alias: ref(s.alias),
     color: ref(s.color),
     sensorId: s.id,
   })) ?? [];
   list.push({
+    localPk: randomPk(),
     prototypeId: ref(null),
-      alias: ref(null),
-      color: null,
-      sensorId: null,
+    alias: ref(null),
+    color: null,
+    sensorId: null,
   });
   return list;
 }
@@ -397,8 +402,10 @@ const addSensor = (value) => {
     try {
       const id = Number(value);
       const sensor = sensorPrototype(id);
+      newSensors.value[newSensors.value.length - 1].localPk = randomPk();
       newSensors.value[newSensors.value.length - 1].alias = sensor.name;
 
+      // Cleanup sensorConfigs if sensor changed
       if (sensor) {
         for (const request of sensor.configurationRequests) {
           if (!sensorConfigs.value[`${newSensors.value.length - 1}-${request.id}`]) {
@@ -419,10 +426,13 @@ const addSensor = (value) => {
           }
         }
       }
-    } catch {}
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   newSensors.value.push({
+    localPk: randomPk(),
     prototypeId: ref(null),
     alias: ref(null),
     color: null,
@@ -497,6 +507,7 @@ const create = async () => {
         });
       }
       newCompiler.sensors.push({
+        localPk: newSensor.localPk,
         prototypeId: newSensor.prototypeId,
         alias: newSensor.alias,
         configs,

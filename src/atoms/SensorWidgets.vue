@@ -29,6 +29,18 @@
       <template v-else-if="props.widget.kind === SensorWidgetKind.String">
         <input :value="model" @blur="emit('update:modelValue', $event.target.value)" class="slot mb-2" />
       </template>
+      <template v-else-if="props.widget.kind === SensorWidgetKind.Sensor">
+        <select v-model="model" class="slot mb-2">
+          <option value=""></option>
+          <option
+            v-for="opt in props.newSensors.filter((s) => s.prototypeId === props.widget.data)"
+            :key="opt.localPk"
+            :value="opt.localPk"
+          >
+            {{ opt.alias }}
+          </option>
+        </select>
+      </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Selection">
         <select v-model="model" class="slot mb-2">
           <option value=""></option>
@@ -46,12 +58,12 @@
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Map">
         <span v-for="(m, index) in model" :key="m.key" class="flex">
-          <SensorWidgets :editing="false" :widget="props.widget.data[0]" v-model="m.key" class="map" />
-          <SensorWidgets :editing="props.editing" :widget="props.widget.data[1]" v-model="m.value" />
+          <SensorWidgets :editing="false" :widget="props.widget.data[0]" v-model="m.key" class="map" :new-sensors="props.newSensors" :sensor-prototypes="props.sensorPrototypes" />
+          <SensorWidgets :editing="props.editing" :widget="props.widget.data[1]" v-model="m.value" :new-sensors="props.newSensors" :sensor-prototypes="props.sensorPrototypes" />
           <button class="ml-2 slot" @click="removeFromMap(index)">Delete</button>
         </span>
         <span v-if="props.widget.kind === SensorWidgetKind.Map" class="flex">
-          <SensorWidgets :editing="props.editing" :widget="props.widget.data[0]" v-model="newElement" />
+          <SensorWidgets :editing="props.editing" :widget="props.widget.data[0]" v-model="newElement" :new-sensors="props.newSensors" :sensor-prototypes="props.sensorPrototypes" />
           <button class="ml-2 slot" @click="addToMap()">Insert</button>
           <span v-if="duplicatedKey" class="ml-2">Unable to add, key has already been set</span>
         </span>
@@ -68,6 +80,7 @@
             SensorWidgetKind.F64,
             SensorWidgetKind.String,
             SensorWidgetKind.Selection,
+            SensorWidgetKind.Sensor,
           ].includes(props.widget.kind)"
       >
         <p class="slot mb-2">{{model}}</p>
@@ -80,8 +93,8 @@
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Map">
         <span v-for="m in model" :key="m.key" class="flex">
-          <SensorWidgets :editing="props.editing" :widget="props.widget.data[0]" v-model="m.key" class="map" />
-          <SensorWidgets :editing="props.editing" :widget="props.widget.data[1]" v-model="m.value" />
+          <SensorWidgets :editing="props.editing" :widget="props.widget.data[0]" v-model="m.key" class="map" :new-sensors="props.newSensors" :sensor-prototypes="props.sensorPrototypes" />
+          <SensorWidgets :editing="props.editing" :widget="props.widget.data[1]" v-model="m.value" :new-sensors="props.newSensors" :sensor-prototypes="props.sensorPrototypes" />
         </span>
       </template>
     </span>
@@ -90,7 +103,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { SensorWidgetKind, DeviceWidgetKind } from "@/models";
+import { SensorWidgetKind, DeviceWidgetKind, SensorPrototype } from "@/models";
 import "vue3-colorpicker/style.css";
 import Moment from '@/atoms/Moment.vue';
 import { defineAsyncComponent } from 'vue'
@@ -110,6 +123,12 @@ const props = defineProps<{
   editing: boolean;
   widget: DeviceWidgetKind;
   modelValue: Value;
+  newSensors: {
+    prototypeId: number;
+    localPk: number;
+    alias: string;
+  };
+  sensorPrototypes: SensorPrototype[];
 }>();
 
 const model = computed({
