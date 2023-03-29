@@ -1,7 +1,7 @@
 <template>
   <div class="login flex w-full flex-row items-center">
     <div class="items-center flex flex-col w-full">
-      <div class="border border-black rounded-sm p-5 flex flex-col">
+      <form class="border border-black rounded-sm p-5 flex flex-col" @submit.prevent>
         <div>
           <label for="email">Email:</label>
           <input class="float-right ml-2" type="text" name="email" v-model="user.email" />
@@ -11,7 +11,7 @@
           <input class="float-right ml-2" type="password" name="password" v-model="user.password" />
         </div>
         <button class="mt-2" v-on:click="login()">Login</button>
-      </div>
+      </form>
     </div>
   </div>
 </template>

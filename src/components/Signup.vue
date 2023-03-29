@@ -1,7 +1,7 @@
 <template>
   <div class="signup flex w-full flex-row items-center">
     <div class="items-center flex flex-col w-full">
-      <div class="border border-black rounded-sm p-5 flex flex-col">
+      <form class="border border-black rounded-sm p-5 flex flex-col" @submit.prevent>
         <div>
           <label for="organization-name">Organization Name:</label>
           <input class="float-right ml-2" type="text" name="organization-name" v-model="user.organizationName" />
@@ -19,7 +19,7 @@
           <input class="float-right ml-2" type="password" name="password" v-model="user.password" />
         </div>
         <button class="mt-2" v-on:click="signup()">Signup</button>
-      </div>
+      </form>
     </div>
   </div>
 </template>

@@ -176,7 +176,14 @@
               v-for="[index, request] in alignedSensorConfigRequestValues"
               :key="`${index}-${request.id}`"
             >
-              <SensorWidgets v-if="request.ty !== null" :editing="customizeCompiler" :widget="request.ty.widget" v-model="sensorConfigs[`${index}-${request.id}`]" :new-sensors="newSensors" :sensor-prototypes="sensorPrototypes"/>
+              <SensorWidgets
+	        v-if="request.ty !== null"
+		v-model="sensorConfigs[`${index}-${request.id}`]"
+		:editing="customizeCompiler"
+		:widget="request.ty.widget"
+		:new-sensors="newSensors"
+		:sensor-prototypes="sensorPrototypes"
+	      />
               <span v-else></span>
             </span>
           </span>
@@ -546,7 +553,7 @@ async function fetchSensorPrototypes(targetId: number) {
           // It's bugged, doesn't support map of maps
           const elements = value.slice(1, value.length - 1).split("std::make_pair(").map((el) => el.trim()).filter((el) => el !== "");
           value = [];
-          for (const element of elements) {
+          for (let element of elements) {
             element = element.slice(0, element.length - 1 - element.endsWith(","));
             const open = [];
             for (let index = 0; index < element.length; ++index) {

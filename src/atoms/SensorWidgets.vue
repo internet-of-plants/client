@@ -58,12 +58,31 @@
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Map">
         <span v-for="(m, index) in model" :key="m.key" class="flex">
-          <SensorWidgets :editing="false" :widget="props.widget.data[0]" v-model="m.key" class="map" :new-sensors="props.newSensors" :sensor-prototypes="props.sensorPrototypes" />
-          <SensorWidgets :editing="props.editing" :widget="props.widget.data[1]" v-model="m.value" :new-sensors="props.newSensors" :sensor-prototypes="props.sensorPrototypes" />
+          <SensorWidgets
+	    v-model="m.key"
+	    :editing="false"
+	    :widget="props.widget.data[0]"
+	    :new-sensors="props.newSensors"
+	    :sensor-prototypes="props.sensorPrototypes"
+	    class="map"
+	  />
+          <SensorWidgets
+	    v-model="m.value"
+	    :editing="props.editing"
+	    :widget="props.widget.data[1]"
+	    :new-sensors="props.newSensors"
+	    :sensor-prototypes="props.sensorPrototypes"
+	  />
           <button class="ml-2 slot" @click="removeFromMap(index)">Delete</button>
         </span>
         <span v-if="props.widget.kind === SensorWidgetKind.Map" class="flex">
-          <SensorWidgets :editing="props.editing" :widget="props.widget.data[0]" v-model="newElement" :new-sensors="props.newSensors" :sensor-prototypes="props.sensorPrototypes" />
+          <SensorWidgets
+	    v-model="newElement"
+	    :editing="props.editing"
+	    :widget="props.widget.data[0]"
+	    :new-sensors="props.newSensors"
+	    :sensor-prototypes="props.sensorPrototypes"
+	  />
           <button class="ml-2 slot" @click="addToMap()">Insert</button>
           <span v-if="duplicatedKey" class="ml-2">Unable to add, key has already been set</span>
         </span>
@@ -93,8 +112,21 @@
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Map">
         <span v-for="m in model" :key="m.key" class="flex">
-          <SensorWidgets :editing="props.editing" :widget="props.widget.data[0]" v-model="m.key" class="map" :new-sensors="props.newSensors" :sensor-prototypes="props.sensorPrototypes" />
-          <SensorWidgets :editing="props.editing" :widget="props.widget.data[1]" v-model="m.value" :new-sensors="props.newSensors" :sensor-prototypes="props.sensorPrototypes" />
+          <SensorWidgets
+	    v-model="m.key"
+	    :editing="props.editing"
+	    :widget="props.widget.data[0]"
+	    :new-sensors="props.newSensors"
+	    :sensor-prototypes="props.sensorPrototypes"
+	    class="map"
+	  />
+          <SensorWidgets
+	    v-model="m.value"
+	    :editing="props.editing"
+	    :widget="props.widget.data[1]"
+	    :new-sensors="props.newSensors"
+	    :sensor-prototypes="props.sensorPrototypes"
+	  />
         </span>
       </template>
     </span>
