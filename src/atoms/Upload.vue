@@ -85,43 +85,48 @@
 
       <div v-if="target" class="mt-2">
         <p class="text-xl">Integrations:</p>
-        <p v-if="!customizeCompiler && alignedNewSensors.length === 1 && alignedNewSensors[0].id !== null">No integrations configured</p>
-        <div class="flex flex-row">
+        <p v-if="!customizeCompiler && alignedSensors.length === 1 && alignedSensors[0].id !== null">
+    No integrations configured
+  </p>
+
+        <div v-else class="flex flex-row">
+          <!-- Created Sensor Color -->
           <div class="flex flex-col">
             <span
-              v-for="([index, newSensor], i) in alignedNewSensors"
+              v-for="([index, sensor], i) in alignedSensors"
               :key="`${i}-${index}`"
               @click.capture="
-                if (!(customizeCompiler && newSensor.color !== null)) {
+                if (!(customizeCompiler && sensor.color !== null)) {
                   $event.preventDefault();
                   $event.stopPropagation();
                 }
               "
             >
               <div
-                v-if="newSensor.color"
+                v-if="sensor.color"
                 class="mb-2 slot color-picker"
               >
                 <ColorPicker
-                  v-model:pure-color="newSensor.color"
-                  @update:pure-color="saveColor($event, newSensor.sensorId)"
+                  v-model:pure-color="sensor.color"
+                  @update:pure-color="saveColor($event, sensor.sensorId)"
                 />
               </div>
-              <div v-else-if="newSensor.color === undefined" class="mb-2 slot"></div>
+              <div v-else-if="sensor.color === undefined" class="mb-2 slot"></div>
             </span>
           </div>
 
+          <!-- Sensors Select -->
           <div class="flex flex-col">
             <span
-              v-for="([index, newSensor], i) in alignedNewSensors"
+              v-for="([index, sensor], i) in alignedSensors"
               :key="`${i}-${index}`"
               class="mb-2 slot"
             >
               <select
-                v-if="customizeCompiler && (newSensor.prototypeId !== null || i === alignedNewSensors.length - 1)"
-                v-model="newSensor.prototypeId"
+                v-if="customizeCompiler && (sensor.prototypeId !== null || i === alignedSensors.length - 1)"
+                v-model="sensor.prototypeId"
                 @change="
-                  addSensor($event.target.value);
+                  addSensor(Number($event.target.value));
                 "
                 class="mr-5 slot"
               >
@@ -137,53 +142,55 @@
                 </template>
               </select>
               <span v-else class="mr-5">
-                {{ sensorPrototype(newSensor.prototypeId)?.name }}
+                {{ sensorPrototype(sensor.prototypeId)?.name }}
               </span>
             </span>
           </div>
 
+          <!-- Alias -->
           <div class="flex flex-col">
             <span
-              v-for="([index, newSensor], i) in alignedNewSensors"
+              v-for="([index, sensor], i) in alignedSensors"
               :key="`${i}-${index}`"
               class="mb-2 slot"
             >
               <input
-                v-if="customizeCompiler && newSensor.alias !== null"
-                v-model="newSensor.alias"
-                @blur="saveAlias(newSensor.alias, newSensor.sensorId)"
+                v-if="customizeCompiler && sensor.alias !== null"
+                v-model="sensor.alias"
+                @blur="saveAlias(sensor.alias, sensor.sensorId)"
                 class="mr-5"
               />
-              <span v-else-if="newSensor.alias !== null" class="mr-5">
-                {{ newSensor.alias }}
+              <span v-else-if="sensor.alias !== null" class="mr-5">
+                {{ sensor.alias }}
               </span>
             </span>
           </div>
 
+          <!-- Requests Names -->
           <span class="flex flex-col">
             <span
-              v-for="[index, request] in alignedSensorConfigRequests"
+              v-for="[index, request] in alignedSensorConfigRequestNames"
               :key="`${index}-${request.id}`"
               class="mb-2 mr-2 slot"
             >
-              <span v-if="request.ty !== null">{{ request.humanName }}</span>
-              <span v-else></span>
+              <span>{{ request.humanName }}</span>
             </span>
           </span>
 
+          <!-- Requests Values -->
           <span class="flex flex-col ml-2">
             <span
               v-for="[index, request] in alignedSensorConfigRequestValues"
               :key="`${index}-${request.id}`"
             >
               <SensorWidgets
-	        v-if="request.ty !== null"
-		v-model="sensorConfigs[`${index}-${request.id}`]"
-		:editing="customizeCompiler"
-		:widget="request.ty.widget"
-		:new-sensors="newSensors"
-		:sensor-prototypes="sensorPrototypes"
-	      />
+                v-if="request.ty !== null"
+                v-model="sensorConfigs[`${index}-${request.id}`]"
+                :editing="customizeCompiler"
+                :widget="request.ty.widget"
+                :sensors-display="sensorsDisplay"
+                :sensor-prototypes="sensorPrototypes"
+              />
               <span v-else></span>
             </span>
           </span>
@@ -201,8 +208,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, toRef, watch } from "vue";
-import { DeviceWidgetKind, SensorWidgetKind, Collection } from "@/models";
+import { onMounted, ref, computed, watch } from "vue";
+import { DeviceWidgetKind, Collection, SensorWidgetKind } from "@/models";
 import SensorWidgets from "@/atoms/SensorWidgets";
 import TargetService from "@/api/target";
 import CompilerService from "@/api/compiler";
@@ -274,13 +281,15 @@ function randomPk() {
 }
 
 function buildNewSensors() {
-  const list = compiler.value?.sensors.map((s) => ({
+  const sortedSensors = compiler.value?.sensors ?? [];
+  sortedSensors.sort((a, b) => a.index - b.index);
+  const list = sortedSensors.map((s) => ({
     localPk: randomPk(),
     prototypeId: ref(s.prototype.id),
     alias: ref(s.alias),
     color: ref(s.color),
     sensorId: s.id,
-  })) ?? [];
+  }));
   list.push({
     localPk: randomPk(),
     prototypeId: ref(null),
@@ -309,13 +318,14 @@ function buildDeviceConfigs() {
   return values;
 }
 
-const newSensors = ref([]);
+const sensorsDisplay = ref([]);
 const sensorConfigs = ref([]);
 const deviceConfigs = ref({});
 
-const alignedNewSensors = computed(() => {
-  return Object.entries(newSensors.value).flatMap(([index, newSensor]) => {
-    const prototype = sensorPrototype(newSensor.prototypeId);
+const alignedSensors = computed(() => {
+  return Object.entries(sensorsDisplay.value).flatMap(([index, sensor]) => {
+    const prototype = sensorPrototype(sensor.prototypeId);
+
     const requests = prototype?.configurationRequests.map(() => ({
       prototypeId: null,
       alias: null,
@@ -324,6 +334,9 @@ const alignedNewSensors = computed(() => {
     })) ?? [];
 
     for (const request of prototype?.configurationRequests ?? []) {
+      // For each line of the array/map we have to add a blank line for the sensor names
+      // Otherwise things get misaligned
+      // We ignore one element if not editing the compiler, because that's the "add element" button
       if (Array.isArray(sensorConfigs.value[`${index}-${request.id}`])) {
         sensorConfigs.value[`${index}-${request.id}`].slice(!Number(customizeCompiler.value)).forEach(() => {
           requests.push({
@@ -335,29 +348,22 @@ const alignedNewSensors = computed(() => {
         });
       }
     }
-    requests[0] = newSensor;
+    requests[0] = sensor;
     return requests.map((request) => [index, request]);
   });
 });
 
-const alignedSensorConfigRequestValues = computed(() => {
-  return Object.entries(newSensors.value).flatMap(([index, newSensor]) => {
-    const prototype = sensorPrototype(newSensor.prototypeId);
-    const requests = [];
-    for (const request of prototype?.configurationRequests ?? []) {
-      requests.push(request);
-    }
-    return requests.map((request) => [index, request]);
-  });
-});
+const alignedSensorConfigRequestNames = computed(() => {
+  return Object.entries(sensorsDisplay.value).flatMap(([index, sensor]) => {
+    const prototype = sensorPrototype(sensor.prototypeId);
 
-const alignedSensorConfigRequests = computed(() => {
-  return Object.entries(newSensors.value).flatMap(([index, newSensor]) => {
-    const prototype = sensorPrototype(newSensor.prototypeId);
     const requests = [];
     for (const request of prototype?.configurationRequests ?? []) {
       requests.push(request);
 
+      // For each line of the array/map we have to add a blank line for the request names
+      // Otherwise things get misaligned
+      // We ignore one element if not editing the compiler, because that's the "add element" button
       if (Array.isArray(sensorConfigs.value[`${index}-${request.id}`])) {
         sensorConfigs.value[`${index}-${request.id}`].slice(!Number(customizeCompiler.value)).forEach(() => {
           requests.push({
@@ -373,8 +379,19 @@ const alignedSensorConfigRequests = computed(() => {
   });
 });
 
+const alignedSensorConfigRequestValues = computed(() => {
+  return Object.entries(sensorsDisplay.value).flatMap(([index, sensor]) => {
+    const prototype = sensorPrototype(sensor.prototypeId);
+    const requests = [];
+    for (const request of prototype?.configurationRequests ?? []) {
+      requests.push(request);
+    }
+    return requests.map((request) => [index, request]);
+  });
+});
+
 const removeEmptySensors = () => {
-  const toRemove = newSensors.value
+  const toRemove = sensorsDisplay.value
     .map((el, index) => [el, index])
     .filter(([s]) => {
       return s.prototypeId === null || s.prototypeId === "";
@@ -395,50 +412,43 @@ const removeEmptySensors = () => {
     }
   }
 
-  newSensors.value = newSensors
+  sensorsDisplay.value = sensorsDisplay
     .value
     .filter((s) => {
       return s.prototypeId !== null && s.prototypeId !== "";
     });
+
+  if (sensorsDisplay.value.length === 0) {
+    sensorsDisplay.value.push({
+      localPk: randomPk(),
+      prototypeId: ref(null),
+      alias: ref(null),
+      color: null,
+      sensorId: null,
+    });
+  }
 }
 
-const addSensor = (value) => {
-  removeEmptySensors();
+const addSensor = (id) => {
+  const sensor = sensorPrototype(id);
+  if (sensor) {
+    sensorsDisplay.value[sensorsDisplay.value.length - 1].alias = sensor.name;
 
-  if (newSensors.value.length !== 0) {
-    try {
-      const id = Number(value);
-      const sensor = sensorPrototype(id);
-      newSensors.value[newSensors.value.length - 1].localPk = randomPk();
-      newSensors.value[newSensors.value.length - 1].alias = sensor.name;
-
-      // Cleanup sensorConfigs if sensor changed
-      if (sensor) {
-        for (const request of sensor.configurationRequests) {
-          if (!sensorConfigs.value[`${newSensors.value.length - 1}-${request.id}`]) {
-            sensorConfigs.value[`${newSensors.value.length - 1}-${request.id}`] = ref(null);
-          }
-
-          const queue = [{ request: request.ty.widget, config: toRef(sensorConfigs.value, `${newSensors.value.length - 1}-${request.id}`) }];
-          let element;
-
-          while (queue.length > 0) {
-            element = queue.shift();
-
-            if (element.request.kind === SensorWidgetKind.Map) {
-              element.config.value = [];
-              queue.push({ request: element.request.data[0], config: toRef(element.config.value[0], "key") });
-              queue.push({ request: element.request.data[1], config: toRef(element.config.value[0], "value") });
-            }
-          }
+    // Cleanup sensorConfigs if sensor changed
+    for (const request of sensor.configurationRequests) {
+      const key = `${sensorsDisplay.value.length - 1}-${request.id}`;
+      if (!sensorConfigs.value[key]) {
+        if (request.ty.widget.kind === SensorWidgetKind.Map) {
+          sensorConfigs.value[key] = ref([]);
+        } else {
+          sensorConfigs.value[key] = ref(null);
         }
       }
-    } catch (err) {
-      console.error(err);
     }
   }
 
-  newSensors.value.push({
+  removeEmptySensors();
+  sensorsDisplay.value.push({
     localPk: randomPk(),
     prototypeId: ref(null),
     alias: ref(null),
@@ -494,29 +504,31 @@ const create = async () => {
       });
     }
 
-    for (const [index, newSensor] of Object.entries(newSensors.value)) {
-      if (newSensor.prototypeId === null) continue;
+    for (const [index, sensor] of Object.entries(sensorsDisplay.value)) {
+      if (sensor.prototypeId === null) continue;
 
-      if (!sensorPrototype(newSensor.prototypeId)) {
+      if (!sensorPrototype(sensor.prototypeId)) {
         loading.value = false;
-        throw new Error(`invalid sensor configured: ${newSensor.prototypeId}`);
+        throw new Error(`invalid sensor configured: ${sensor.prototypeId}`);
       }
 
       const configs = [];
-      for (const request of sensorPrototype(newSensor.prototypeId).configurationRequests) {
-        if ((sensorConfigs.value[`${index}-${request.id}`] ?? "") === "") {
+      for (const request of sensorPrototype(sensor.prototypeId).configurationRequests) {
+        const key = `${index}-${request.id}`
+        if ((sensorConfigs.value[key] ?? "") === "") {
           loading.value = false;
           throw new Error(`missing config for ${request.name}`);
         }
+
         configs.push({
           requestId: request.id,
-          value: sensorConfigs.value[`${index}-${request.id}`],
+          value: sensorConfigs.value[key],
         });
       }
       newCompiler.sensors.push({
-        localPk: newSensor.localPk,
-        prototypeId: newSensor.prototypeId,
-        alias: newSensor.alias,
+        localPk: sensor.localPk,
+        prototypeId: sensor.prototypeId,
+        alias: sensor.alias,
         configs,
       });
     }
@@ -538,43 +550,19 @@ async function fetchCompilers(id) {
 
 async function fetchSensorPrototypes(targetId: number) {
   sensorPrototypes.value = undefined;
-  const s = await SensorPrototypeService.listForTarget(targetId);
-  sensorPrototypes.value = s;
+  sensorPrototypes.value = await SensorPrototypeService.listForTarget(targetId);
   
-  sensorConfigs.value = Object.entries(compiler.value?.sensors ?? [])
-    .flatMap(([index, s]) => s.configurations.map((c) => [index, c]))
+  sensorConfigs.value = (compiler.value?.sensors ?? [])
+    .flatMap((sensor) => sensor.configurations.map((c) => [sensor, c]))
     .reduce(
-      (acc, [index, val]) => {
-        let value = val.value;
-
-        const request = sensorPrototypes.value.flatMap((s) => s.configurationRequests).find((c) => c.id === val.requestId);
-        if (request.ty.widget.kind === SensorWidgetKind.Map) {
-          // Note: This sucks
-          // It's bugged, doesn't support map of maps
-          const elements = value.slice(1, value.length - 1).split("std::make_pair(").map((el) => el.trim()).filter((el) => el !== "");
-          value = [];
-          for (let element of elements) {
-            element = element.slice(0, element.length - 1 - element.endsWith(","));
-            const open = [];
-            for (let index = 0; index < element.length; ++index) {
-              if (element[index] === "," && open.length === 0) {
-                value.push({ key: element.slice(0, index).trim(), value: element.slice(index + 1).trim() });
-                break;
-              } else if (["[", "(", "{"].includes(element[index])) {
-                open.push(element[index]);
-              } else if (["]", ")", "}"].includes(element[index])) {
-                const opened = open.pop();
-                if (!((opened === "[" && element[index] === "]") || (opened === "(" && element[index] === ")") || (opened === "{" && element[index] === "}"))) {
-                  throw new Error("invalid c++");
-                }
-              }
-            }
-          }
+      (acc, [sensor, config]) => {
+        if (config.request.ty.widget.kind === SensorWidgetKind.Sensor) {
+          config.value = sensorsDisplay.value.find((s) => s.sensorId === config.value.sensorId).localPk;
         }
-        
+
         return {
           ...acc,
-          [`${index}-${val.requestId}`]: ref(value),
+          [`${sensor.index}-${config.request.id}`]: ref(config.value),
         };
       },
       {}
@@ -618,7 +606,7 @@ const saveAlias = async (alias: string, sensorId?: number) => {
 const updateTarget = async (id: number | undefined) => {
   if (!id) return;
   await fetchCompilers(id);
-  newSensors.value = buildNewSensors();
+  sensorsDisplay.value = buildNewSensors();
   await fetchSensorPrototypes(id);
 
   deviceConfigs.value = buildDeviceConfigs();

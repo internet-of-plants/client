@@ -78,7 +78,6 @@ export enum SensorWidgetKind {
   U64 = "U64",
   F32 = "F32",
   F64 = "F64",
-  String = "String",
   Sensor = "Sensor",
   Selection = "Selection",
   Moment = "Moment",
@@ -97,7 +96,9 @@ export interface ConfigTypeSensor {
   name: string;
   widget: {
     kind: SensorWidgetKind.Sensor;
-    data: number;
+    data: {
+      sensorId: number;
+    };
   };
 }
 
@@ -113,7 +114,11 @@ export interface ConfigTypeMoment {
   name: string;
   widget: {
     kind: SensorWidgetKind.Moment;
-    data: string;
+    data: {
+      hour: number;
+      minute: number;
+      second: number;
+    };
   };
 }
 
@@ -159,7 +164,7 @@ export interface Measurement {
 }
 
 export interface Config {
-  requestId: number;
+  request: ConfigRequest;
   name: string;
   typeName: string;
   value: string;
@@ -168,7 +173,9 @@ export interface Config {
 export interface Sensor {
   id: number;
   name: string;
+  index: number;
   alias: string;
+  variableName: string;
   color: string;
   dependencies: string[];
   includes: string[];
@@ -184,6 +191,7 @@ export interface SensorPrototype {
   includes: string[];
   setups: string[];
   configurationRequests: ConfigRequest[];
+  variableName: string | null;
 }
 
 export interface Event {

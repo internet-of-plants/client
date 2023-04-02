@@ -9,7 +9,7 @@ import Datepicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 
 const props = defineProps<{
-  modelValue: string | undefined;
+  modelValue: { hours: number; minutes: number; seconds: number } | null;
   editing: boolean;
 }>();
 
@@ -19,14 +19,14 @@ const emit = defineEmits(["update:modelValue"]);
 const model = computed({
   get() {
     if (!props.modelValue) {
-      emit("update:modelValue", `relay::Moment(0, 0, 0)`);
+      emit("update:modelValue", { hours: 0, minutes: 0, seconds: 0 });
       return { hours: 0, minutes: 0, seconds: 0};
     }
-    const elements = props.modelValue.slice(0, props.modelValue.length - 1).slice("relay::Moment(".length).split(",").map((el) => el.trim());
-    return { hours: elements[0], minutes: elements[1], seconds: elements[2] };
+    const { hours, minutes, seconds } = props.modelValue;
+    return { hours, minutes, seconds };
   },
   set(value) {
-    emit("update:modelValue", `relay::Moment(${value?.hours ?? 0}, ${value?.minutes ?? 0}, ${value?.seconds ?? 0})`);
+    emit("update:modelValue", { hours: value?.hours ?? 0, minutes: value?.minutes ?? 0, seconds: value?.seconds ?? 0 });
   }
 });
 </script>

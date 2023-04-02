@@ -6,34 +6,28 @@
             SensorWidgetKind.Seconds,
             SensorWidgetKind.U8,
             SensorWidgetKind.U16,
+            SensorWidgetKind.U32,
+            SensorWidgetKind.U64,
           ].includes(props.widget.kind)"
       >
-        <input :value="model" @blur="emit('update:modelValue', $event.target.value)" class="slot mb-2" size="5" />
+        <Num v-model="model" class="slot mb-2" size="5" />
       </template>
       <template
           v-else-if="[
-            SensorWidgetKind.Seconds,
-            SensorWidgetKind.U8,
-            SensorWidgetKind.U16,
-            SensorWidgetKind.U32,
-            SensorWidgetKind.U64,
             SensorWidgetKind.F32,
             SensorWidgetKind.F64,
           ].includes(props.widget.kind)"
       >
-        <input :value="model" @blur="emit('update:modelValue', $event.target.value)" class="slot mb-2" size="10" />
+        <Num v-model="model" :is-float="true" class="slot mb-2" size="5" />
       </template>
       <template v-if="props.widget.kind === SensorWidgetKind.Seconds">
       seconds
-      </template>
-      <template v-else-if="props.widget.kind === SensorWidgetKind.String">
-        <input :value="model" @blur="emit('update:modelValue', $event.target.value)" class="slot mb-2" />
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Sensor">
         <select v-model="model" class="slot mb-2">
           <option value=""></option>
           <option
-            v-for="opt in props.newSensors.filter((s) => s.prototypeId === props.widget.data)"
+            v-for="opt in props.sensorsDisplay.filter((s) => s.prototypeId === props.widget.data)"
             :key="opt.localPk"
             :value="opt.localPk"
           >
@@ -58,31 +52,33 @@
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Map">
         <span v-for="(m, index) in model" :key="m.key" class="flex">
-          <SensorWidgets
-	    v-model="m.key"
-	    :editing="false"
-	    :widget="props.widget.data[0]"
-	    :new-sensors="props.newSensors"
-	    :sensor-prototypes="props.sensorPrototypes"
-	    class="map"
-	  />
-          <SensorWidgets
-	    v-model="m.value"
-	    :editing="props.editing"
-	    :widget="props.widget.data[1]"
-	    :new-sensors="props.newSensors"
-	    :sensor-prototypes="props.sensorPrototypes"
-	  />
-          <button class="ml-2 slot" @click="removeFromMap(index)">Delete</button>
+          <span v-if="m.key !== undefined">
+            <SensorWidgets
+              v-model="m.key"
+              :editing="false"
+              :widget="props.widget.data[0]"
+              :sensors-display="props.sensorsDisplay"
+              :sensor-prototypes="props.sensorPrototypes"
+              class="map"
+            />
+            <SensorWidgets
+              v-model="m.value"
+              :editing="props.editing"
+              :widget="props.widget.data[1]"
+              :sensors-display="props.sensorsDisplay"
+              :sensor-prototypes="props.sensorPrototypes"
+            />
+            <button class="ml-2 slot" @click="removeFromMap(index)">Delete</button>
+          </span>
         </span>
         <span v-if="props.widget.kind === SensorWidgetKind.Map" class="flex">
           <SensorWidgets
-	    v-model="newElement"
-	    :editing="props.editing"
-	    :widget="props.widget.data[0]"
-	    :new-sensors="props.newSensors"
-	    :sensor-prototypes="props.sensorPrototypes"
-	  />
+            v-model="newMapElement"
+            :editing="props.editing"
+            :widget="props.widget.data[0]"
+            :sensors-display="props.sensorsDisplay"
+            :sensor-prototypes="props.sensorPrototypes"
+          />
           <button class="ml-2 slot" @click="addToMap()">Insert</button>
           <span v-if="duplicatedKey" class="ml-2">Unable to add, key has already been set</span>
         </span>
@@ -97,12 +93,13 @@
             SensorWidgetKind.U64,
             SensorWidgetKind.F32,
             SensorWidgetKind.F64,
-            SensorWidgetKind.String,
             SensorWidgetKind.Selection,
-            SensorWidgetKind.Sensor,
           ].includes(props.widget.kind)"
       >
         <p class="slot mb-2">{{model}}</p>
+      </template>
+      <template v-else-if="props.widget.kind === SensorWidgetKind.Sensor">
+        <p class="slot mb-2">{{props.sensorsDisplay.find((s) => s.localPk === model).alias}}</p>
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Seconds">
         <p class="slot mb-2">{{model}} seconds</p>
@@ -113,20 +110,20 @@
       <template v-else-if="props.widget.kind === SensorWidgetKind.Map">
         <span v-for="m in model" :key="m.key" class="flex">
           <SensorWidgets
-	    v-model="m.key"
-	    :editing="props.editing"
-	    :widget="props.widget.data[0]"
-	    :new-sensors="props.newSensors"
-	    :sensor-prototypes="props.sensorPrototypes"
-	    class="map"
-	  />
+            v-model="m.key"
+            :editing="props.editing"
+            :widget="props.widget.data[0]"
+            :sensors-display="props.sensorsDisplay"
+            :sensor-prototypes="props.sensorPrototypes"
+            class="map"
+          />
           <SensorWidgets
-	    v-model="m.value"
-	    :editing="props.editing"
-	    :widget="props.widget.data[1]"
-	    :new-sensors="props.newSensors"
-	    :sensor-prototypes="props.sensorPrototypes"
-	  />
+            v-model="m.value"
+            :editing="props.editing"
+            :widget="props.widget.data[1]"
+            :sensors-display="props.sensorsDisplay"
+            :sensor-prototypes="props.sensorPrototypes"
+          />
         </span>
       </template>
     </span>
@@ -138,24 +135,25 @@ import { computed, ref } from "vue";
 import { SensorWidgetKind, DeviceWidgetKind, SensorPrototype } from "@/models";
 import "vue3-colorpicker/style.css";
 import Moment from '@/atoms/Moment.vue';
+import Num from "@/atoms/Num.vue";
 import { defineAsyncComponent } from 'vue'
 
 const SensorWidgets = defineAsyncComponent(() =>
   import('@/atoms/SensorWidgets.vue')
 )
 
-const newElement = ref(null);
+const newMapElement = ref(null);
 const duplicatedKey = ref(false);
 
 const emit = defineEmits(["update:modelValue"]);
 
-type Value = string | number | null | { key: Value; value: Value }[];
+type Value = string | number | null | { key: Value; value: Value }[] | { hours: number; minutes: number; seconds: number };
 
 const props = defineProps<{
   editing: boolean;
   widget: DeviceWidgetKind;
   modelValue: Value;
-  newSensors: {
+  sensorsDisplay: {
     prototypeId: number;
     localPk: number;
     alias: string;
@@ -168,15 +166,14 @@ const model = computed({
     return props.modelValue;
   },
   set(value) {
-    duplicatedKey.value = Array.isArray(props.modelValue) && props.widget.kind === SensorWidgetKind.Map ? (props.modelValue.find((el) => el.key === newElement?.value) ?? false) : false;
     emit("update:modelValue", value);
   }
-})
+});
 
 const addToMap = () => {
-  duplicatedKey.value = model.value.find((el) => el.key === newElement?.value) ?? false;
-  if (newElement.value !== null && !duplicatedKey.value) {
-    model.value.push({ key: newElement.value, value: null });
+  duplicatedKey.value = !!model.value.find((el) => el.key === newMapElement?.value);
+  if (newMapElement.value !== null && !duplicatedKey.value) {
+    model.value.push({ key: newMapElement.value, value: null });
   }
 }
 
