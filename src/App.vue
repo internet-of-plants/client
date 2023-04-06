@@ -1,69 +1,103 @@
 <template>
   <div id="nav" class="w-full text-center pt-5">
-    <router-link v-if="isAuthenticated" class="link text-xl" :class="selected('Organizations')" to="/">All Organizations</router-link>
-    <router-link v-if="isAuthenticated && organizationId" class="link text-xl" :class="selected('Organization')" :to="`/organization/${organizationId}`">Current Organization</router-link>
-    <router-link v-if="isAuthenticated && collectionId" class="link text-xl" :class="selected('Collection')" :to="`/organization/${organizationId}/collection/${collectionId}`">Current Collection</router-link>
-    <router-link v-if="!isAuthenticated" class="link text-xl" :class="selected('Login')" to="/login">Login</router-link>
-    <router-link v-if="!isAuthenticated" class="link text-xl" :class="selected('Signup')" to="/signup">Signup</router-link>
+    <RouterLink
+      v-if="isAuthenticated"
+      class="link text-xl"
+      :class="selected('Organizations')"
+      to="/"
+      >All Organizations</RouterLink
+    >
+    <RouterLink
+      v-if="isAuthenticated && organizationId"
+      class="link text-xl"
+      :class="selected('Organization')"
+      :to="`/organization/${organizationId}`"
+      >Current Organization</RouterLink
+    >
+    <RouterLink
+      v-if="isAuthenticated && collectionId"
+      class="link text-xl"
+      :class="selected('Collection')"
+      :to="`/organization/${organizationId}/collection/${collectionId}`"
+      >Current Collection</RouterLink
+    >
+    <RouterLink v-if="!isAuthenticated" class="link text-xl" :class="selected('Login')" to="/login"
+      >Login</RouterLink
+    >
+    <RouterLink
+      v-if="!isAuthenticated"
+      class="link text-xl"
+      :class="selected('Signup')"
+      to="/signup"
+      >Signup</RouterLink
+    >
     <slot name="router"></slot>
   </div>
   <div class="content">
-    <router-view />
+    <RouterView />
   </div>
   <div class="flex flex-col w-full footer px-5">
-    <a href="https://www.flaticon.com/free-icons/soil" title="soil icons">Soil icons created by Smashicons - Flaticon</a>
-    <a href="https://www.flaticon.com/free-icons/hot" title="hot icons">Hot icons created by Freepik - Flaticon</a>
-    <a href="https://www.flaticon.com/free-icons/evaporation" title="evaporation icons">Evaporation icons created by Smashicons - Flaticon</a>
-    <a href="https://www.flaticon.com/free-icons/plant" title="plant icons">Plant icons created by Freepik - Flaticon</a>
+    <a href="https://www.flaticon.com/free-icons/soil" title="soil icons"
+      >Soil icons created by Smashicons - Flaticon</a
+    >
+    <a href="https://www.flaticon.com/free-icons/hot" title="hot icons"
+      >Hot icons created by Freepik - Flaticon</a
+    >
+    <a href="https://www.flaticon.com/free-icons/evaporation" title="evaporation icons"
+      >Evaporation icons created by Smashicons - Flaticon</a
+    >
+    <a href="https://www.flaticon.com/free-icons/plant" title="plant icons"
+      >Plant icons created by Freepik - Flaticon</a
+    >
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from "vue";
-import '@/tailwind.css';
-import { useRoute } from "vue-router";
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+import '@/tailwind.css'
 
-const organizationId = computed(() => useRoute().params.organizationId);
-const collectionId = computed(() => useRoute().params.collectionId);
-const deviceId = computed(() => useRoute().params.deviceId);
+const organizationId = computed(() => useRoute().params.organizationId)
+const collectionId = computed(() => useRoute().params.collectionId)
+const deviceId = computed(() => useRoute().params.deviceId)
 
-const selected = (route) => {
+const selected = (route: string) => {
   switch (route) {
-    case "Organizations":
+    case 'Organizations':
       if (!organizationId.value) {
-        return ["selected"];
+        return ['selected']
       }
-      break;
-    case "Organization":
+      break
+    case 'Organization':
       if (organizationId.value && !collectionId.value) {
-        return ["selected"];
+        return ['selected']
       }
-      break;
-    case "Organization":
+      break
+    case 'Collection':
       if (collectionId.value && !deviceId.value) {
-        return ["selected"];
+        return ['selected']
       }
-      break;
-    case "Signup":
-      if (useRoute().path === "/signup") {
-        return ["selected"];
+      break
+    case 'Signup':
+      if (useRoute().path === '/signup') {
+        return ['selected']
       }
-      break;
-    case "Login":
-      if (useRoute().path === "/login") {
-        return ["selected"];
+      break
+    case 'Login':
+      if (useRoute().path === '/login') {
+        return ['selected']
       }
-      break;
+      break
   }
-  return [];
-};
+  return []
+}
 
-const isAuthenticated = ref(!!localStorage.getItem("token"));
+const isAuthenticated = ref(!!localStorage.getItem('token'))
 const updateAuthenticated = () => {
-  isAuthenticated.value = !!localStorage.getItem("token");
-};
-onMounted(() => window.addEventListener("storage", updateAuthenticated));
-onUnmounted(() => window.removeEventListener("storage", updateAuthenticated));
+  isAuthenticated.value = !!localStorage.getItem('token')
+}
+onMounted(() => window.addEventListener('storage', updateAuthenticated))
+onUnmounted(() => window.removeEventListener('storage', updateAuthenticated))
 </script>
 
 <style lang="scss">
@@ -71,7 +105,7 @@ onUnmounted(() => window.removeEventListener("storage", updateAuthenticated));
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #DFDFDF;
+  background-color: #dfdfdf;
   color: #626262;
   overflow: none;
   height: 100vh;
@@ -79,7 +113,7 @@ onUnmounted(() => window.removeEventListener("storage", updateAuthenticated));
   margin: 0;
 }
 input {
-  background-color: #DFDFDF;
+  background-color: #dfdfdf;
   border: solid 1px #626262;
   border-radius: 3px;
   padding-left: 5px;

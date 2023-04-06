@@ -1,70 +1,67 @@
-import config from "@/constants";
-import router from "@/router";
+import config from '@/constants'
+import router from '@/router'
 
-export async function get<T>(
-  route: string,
-  body?: unknown
-): Promise<T> {
-  const token = localStorage.getItem("token") ?? undefined;
+export async function get<T>(route: string, body?: unknown): Promise<T> {
+  const token = localStorage.getItem('token') ?? undefined
   if (token === undefined) {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token')
     window.dispatchEvent(new Event('storage'))
-    router.push({ path: "/login" });
-    throw new Error("not authenticated");
+    router.push({ path: '/login' })
+    throw new Error('not authenticated')
   }
 
-  const headers: Record<string, string> = { Authorization: `Basic ${token}` };
+  const headers: Record<string, string> = { Authorization: `Basic ${token}` }
 
-  let query = "";
+  let query = ''
   if (body !== undefined) {
     query = Object.entries(body as Record<string, string | number | boolean>)
       .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-      .join("&");
+      .join('&')
   }
 
   const response = await fetch(`${config.API_HOST}${route}?${query}`, {
-    method: "GET",
-    headers,
-  });
+    method: 'GET',
+    headers
+  })
   if (response.status === 401) {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token')
     window.dispatchEvent(new Event('storage'))
-    router.push({ path: "/login" });
-    throw new Error("not authenticated");
+    router.push({ path: '/login' })
+    throw new Error('not authenticated')
   }
-  return await response.json();
+  return await response.json()
 }
 
-type Body = FormData | unknown;
+type Body = FormData | unknown
 
 export async function post<T>(route: string, body?: Body): Promise<T> {
-  const token = localStorage.getItem("token") ?? undefined;
+  const token = localStorage.getItem('token') ?? undefined
   if (token === undefined) {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token')
     window.dispatchEvent(new Event('storage'))
-    router.push({ path: "/login" });
-    throw new Error("not authenticated");
+    router.push({ path: '/login' })
+    throw new Error('not authenticated')
   }
 
-  const headers: Record<string, string> = { Authorization: `Basic ${token}` };
-  let newBody;
+  const headers: Record<string, string> = { Authorization: `Basic ${token}` }
+  let newBody
   if (body !== undefined && !(body instanceof FormData)) {
-    headers["Content-Type"] = "application/json";
-    newBody = JSON.stringify(body);
+    headers['Content-Type'] = 'application/json'
+    newBody = JSON.stringify(body)
   } else {
-    newBody = body;
+    newBody = body
   }
   const response = await fetch(`${config.API_HOST}${route}`, {
-    method: "POST",
+    method: 'POST',
     body: newBody,
-    headers,
-  });
+    headers
+  })
   if (response.status === 401) {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token')
     window.dispatchEvent(new Event('storage'))
-    router.push({ path: "/login" });
-    throw new Error("not authenticated");
+    router.push({ path: '/login' })
+    throw new Error('not authenticated')
   }
 
-  return await response.json();
+  return await response.json()
 }

@@ -1,7 +1,7 @@
 <template>
-  <Organizations/>
+  <Organizations />
 </template>
 
 <script setup lang="ts">
-import Organizations from '@/components/Organizations.vue';
+import Organizations from '@/components/IopOrganizations.vue'
 </script>

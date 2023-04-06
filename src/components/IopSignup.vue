@@ -4,7 +4,12 @@
       <form class="border border-black rounded-sm p-5 flex flex-col" @submit.prevent>
         <div>
           <label for="organization-name">Organization Name:</label>
-          <input class="float-right ml-2" type="text" name="organization-name" v-model="user.organizationName" />
+          <input
+            class="float-right ml-2"
+            type="text"
+            name="organization-name"
+            v-model="user.organizationName"
+          />
         </div>
         <div class="pt-1">
           <label for="email">Email:</label>
@@ -25,27 +30,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import config from "@/constants";
-import router from "@/router";
+import { ref } from 'vue'
+import config from '@/constants'
+import router from '@/router'
 
-const user = ref({ email: "", username: "", password: "", organizationName: "" });
-if (localStorage.getItem("token") !== null) {
-  router.push({ path: "/" });
+const user = ref({ email: '', username: '', password: '', organizationName: '' })
+if (localStorage.getItem('token') !== null) {
+  router.push({ path: '/' })
 }
 
 const signup = async () => {
   const req = await fetch(`${config.API_HOST}/v1/user`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(user.value),
-  });
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(user.value)
+  })
   if (req.status === 200) {
-    localStorage.setItem("token", await req.text());
+    localStorage.setItem('token', await req.text())
     window.dispatchEvent(new Event('storage'))
   }
-  router.push({ path: "/" });
-};
+  router.push({ path: '/' })
+}
 </script>
 
 <style scoped lang="scss">

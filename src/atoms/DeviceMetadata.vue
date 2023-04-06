@@ -1,15 +1,14 @@
 <template>
   <div v-if="props.device" class="flex box">
     <div class="flex flex-col w-full">
-      <p v-if="props.device.description">
-        <b>Description: </b>{{ props.device.description }}
-      </p>
+      <p v-if="props.device.description"><b>Description: </b>{{ props.device.description }}</p>
 
-      <div v-if="props.device.lastEvent" class="flex flex-row flex-wrap justify-center w-full measurements">
+      <div
+        v-if="props.device.lastEvent"
+        class="flex flex-row flex-wrap justify-center w-full measurements"
+      >
         <span
-          v-for="([key, value], index) in Object.entries(
-            props.device.lastEvent.measurements
-          )"
+          v-for="([key, value], index) in Object.entries(props.device.lastEvent.measurements)"
           :key="key"
           class="flex flex-col m-2 text-center"
         >
@@ -33,15 +32,12 @@
             class="w-16 h-16 p-3.5 self-center"
             src="/air-humidity.png"
           />
-          <span class="text-center text-xl">
-            {{ Math.trunc(value, 2) }}{{ unit(key) }}
-          </span>
-          <p class="text-center" v-for="line in humanName(key).split('\n')" :key="line">{{line}}</p>
+          <span class="text-center text-xl"> {{ value.toFixed(2) }}{{ unit(key) }} </span>
+          <p class="text-center" v-for="line in humanName(key).split('\n')" :key="line">
+            {{ line }}
+          </p>
           <span
-            v-if="
-              index ===
-              Object.keys(props.device.lastEvent.measurements).length - 1
-            "
+            v-if="index === Object.keys(props.device.lastEvent.measurements).length - 1"
             class="text-xs text-right"
           >
             <Time :moment="props.device.lastEvent.createdAt" />
@@ -53,54 +49,49 @@
 </template>
 
 <script setup lang="ts">
-import Time from "@/atoms/Time.vue";
-import { Device, MeasurementType, MeasurementKind } from "@/models";
+import Time from '@/atoms/IopTime.vue'
+import type { Device } from '@/models'
+import { MeasurementKind, MeasurementType } from '@/models'
 
 const props = defineProps<{
-  organizationId: number;
-  collectionId: number;
-  device: Device;
-  editing: boolean;
-}>();
+  device: Device
+  editing: boolean
+}>()
 
 const alias = (name: string): string | undefined => {
   return (props.device.compiler?.sensors ?? []).find((s) =>
     s.measurements.find((m) => m.name === name)
-  )?.alias;
-};
+  )?.alias
+}
 
 const humanName = (name: string) => {
-  const metadata = (props.device.lastEvent?.metadatas ?? []).find(
-    (m) => m.name === name
-  );
+  const metadata = (props.device.lastEvent?.metadatas ?? []).find((m) => m.name === name)
 
   if (metadata) {
-    const humanName = metadata.humanName;
-    const sensorAlias = alias(metadata.name);
-    return sensorAlias ? `${humanName}\n${sensorAlias}` : humanName;
+    const humanName = metadata.humanName
+    const sensorAlias = alias(metadata.name)
+    return sensorAlias ? `${humanName}\n${sensorAlias}` : humanName
   } else {
-    return name;
+    return name
   }
-};
+}
 
 const metadata = (name: string) => {
-  return (props.device.lastEvent?.metadatas ?? []).find((m) => m.name === name);
-};
+  return (props.device.lastEvent?.metadatas ?? []).find((m) => m.name === name)
+}
 
 const unit = (name: string) => {
-  const metadata = (props.device.lastEvent?.metadatas ?? []).find(
-    (m) => m.name === name
-  );
-  if (!metadata) return "";
+  const metadata = (props.device.lastEvent?.metadatas ?? []).find((m) => m.name === name)
+  if (!metadata) return ''
   switch (metadata.ty) {
     case MeasurementType.Percentage:
-      return "%";
+      return '%'
     case MeasurementType.RawAnalogRead:
-      return "";
+      return ''
     case MeasurementType.FloatCelsius:
-      return "ºC";
+      return 'ºC'
   }
-};
+}
 </script>
 <style lang="scss" scoped>
 .box {

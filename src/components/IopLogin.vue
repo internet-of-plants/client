@@ -17,24 +17,28 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
-import config from '@/constants';
-import router from '@/router';
+import { reactive } from 'vue'
+import config from '@/constants'
+import router from '@/router'
 
-const user = reactive({ email: '', password: '' });
+const user = reactive({ email: '', password: '' })
 
 if (localStorage.getItem('token') !== null) {
-  router.push({ path: '/' });
+  router.push({ path: '/' })
 }
 
 const login = async () => {
-  const req = await fetch(`${config.API_HOST}/v1/user/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(user) });
+  const req = await fetch(`${config.API_HOST}/v1/user/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(user)
+  })
   if (req.status === 200) {
-    localStorage.setItem('token', await req.text());
+    localStorage.setItem('token', await req.text())
     window.dispatchEvent(new Event('storage'))
   }
-  router.push({ path: '/' });
-};
+  router.push({ path: '/' })
+}
 </script>
 
 <style scoped lang="scss">

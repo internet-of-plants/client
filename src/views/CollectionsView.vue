@@ -1,7 +1,7 @@
 <template>
-  <Collections/>
+  <Collections />
 </template>
 
 <script setup lang="ts">
-import Collections from '@/components/Collections.vue';
+import Collections from '@/components/IopCollections.vue'
 </script>

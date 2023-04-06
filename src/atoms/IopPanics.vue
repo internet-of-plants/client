@@ -13,25 +13,22 @@
 </template>
 
 <script setup lang="ts">
-import PanicService from "@/api/panic";
-import Time from "@/atoms/Time.vue";
-import { DevicePanic } from "@/models";
+import PanicService from '@/api/panic'
+import Time from '@/atoms/IopTime.vue'
+import type { DevicePanic } from '@/models'
+import router from '@/router'
 
 const props = defineProps<{
-  panics: DevicePanic[];
-  organizationId: number;
-  collectionId: number;
-  deviceId: number;
-}>();
+  panics: DevicePanic[]
+  deviceId: number
+}>()
 
 const solveDevicePanic = async (panicId: number): Promise<void> => {
   await PanicService.solve({
-    organizationId: props.organizationId,
-    collectionId: props.collectionId,
     deviceId: props.deviceId,
-    panicId,
-  });
+    panicId
+  })
 
-  router.go(0);
-};
+  router.go(0)
+}
 </script>

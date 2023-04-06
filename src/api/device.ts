@@ -1,24 +1,24 @@
-import type { Device } from "@/models";
-import * as HTTP from "@/http";
+import type { Device } from '@/models'
+import * as HTTP from '@/http'
 
 export interface DeviceContext {
-  deviceId: number;
+  deviceId: number
 }
 
 async function find(ctx: DeviceContext): Promise<Device> {
-  return await HTTP.get("/v1/device", ctx);
+  return await HTTP.get('/v1/device', ctx)
 }
 
 export interface NameUpdateContext extends DeviceContext {
-  name: string;
+  name: string
 }
 
 async function setName(ctx: NameUpdateContext): Promise<void> {
-  await HTTP.post("/v1/device/name", ctx);
+  await HTTP.post('/v1/device/name', ctx)
 }
 
 const DeviceService = {
   find,
-  setName,
-};
-export default DeviceService;
+  setName
+}
+export default DeviceService

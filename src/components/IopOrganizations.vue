@@ -12,17 +12,21 @@
 </template>
 
 <script setup lang="ts">
-import OrganizationService from "@/api/organization";
-import { onMounted, ref } from "vue";
-import router from "@/router";
+import OrganizationService from '@/api/organization'
+import type { Organization } from '@/models'
+import { onMounted, ref } from 'vue'
+import router from '@/router'
 
-const organizations = ref(undefined);
+const organizations = ref<Organization[] | null>(null)
 onMounted(async () => {
-  organizations.value = await OrganizationService.list();
-  if (organizations.value.length === 1) {
-    router.push({ path: `/organization/${organizations.value[0].id}` });
+  organizations.value = await OrganizationService.list()
+  if (
+    organizations.value.length === 1 &&
+    organizations.value[0].collections.some((c) => c.devices.length > 0)
+  ) {
+    router.push({ path: `/organization/${organizations.value[0].id}` })
   }
-});
+})
 </script>
 
 <style scoped lang="scss">
