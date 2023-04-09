@@ -25,7 +25,6 @@ export interface Compilation {
 export interface Target {
   id: number
   arch: string
-  name: string
   buildFlags: string
   platform: string
   framework: string | null
@@ -38,8 +37,8 @@ export interface Target {
 
 export interface DeviceConfigRequest {
   id: number
+  variableName: string
   name: string
-  humanName: string
   secretAlgo: SecretAlgo | null
   ty: DeviceConfigType
 }
@@ -133,8 +132,8 @@ export type ConfigType =
 
 export interface ConfigRequest {
   id: number
+  variableName: string
   name: string
-  humanName: string
   ty: ConfigType
 }
 
@@ -155,8 +154,8 @@ export enum MeasurementType {
 }
 
 export interface Measurement {
+  variableName: string
   name: string
-  humanName: string
   ty: MeasurementType
   kind: MeasurementKind
   color: string

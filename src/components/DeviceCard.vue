@@ -31,8 +31,8 @@
           class="w-16 h-16 p-3.5 self-center"
           src="/air-humidity.png"
         />
-        <span class="text-center text-xl">{{ value.toFixed(2) }}{{ unit(key) }}</span>
-        <p class="text-center" v-for="line in humanName(key).split('\n')" :key="line">{{ line }}</p>
+        <span class="text-center text-xl">{{ formatDecimalPlaces(value) }}{{ unit(key) }}</span>
+        <p class="text-center" v-for="line in name(key).split('\n')" :key="line">{{ line }}</p>
         <span
           v-if="index === Object.keys(props.device.lastEvent.measurements).length - 1"
           class="text-xs text-right"
@@ -80,13 +80,13 @@ const alias = (name: string): string | undefined => {
     ?.alias
 }
 
-const humanName = (name: string) => {
+const name = (name: string) => {
   const metadata = (props.device.lastEvent?.metadatas ?? []).find((m) => m.name === name)
 
   if (metadata) {
-    const humanName = metadata.humanName
+    const name = metadata.name
     const sensorAlias = alias(metadata.name)
-    return sensorAlias ? `${sensorAlias}\n${humanName}` : humanName
+    return sensorAlias ? `${sensorAlias}\n${name}` : name
   } else {
     return name
   }
@@ -107,6 +107,11 @@ const unit = (name: string) => {
     case MeasurementType.FloatCelsius:
       return 'ºC'
   }
+}
+
+function formatDecimalPlaces(value: number) {
+  const decimalPlaces = Math.max((value.toString().split('.')[1]?.length ?? 1) - 1, 0)
+  return value.toFixed(Math.min(decimalPlaces, 2))
 }
 </script>
 

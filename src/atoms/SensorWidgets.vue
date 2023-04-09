@@ -19,7 +19,9 @@
       >
         <Num v-model="numModel" :is-float="true" class="slot mb-2" size="5" />
       </template>
-      <template v-if="props.widget.kind === SensorWidgetKind.Seconds"> second{{ (model && model > 1) ? "s" : "" }}</template>
+      <template v-if="props.widget.kind === SensorWidgetKind.Seconds">
+        second{{ model && model > 1 ? 's' : '' }}</template
+      >
       <template v-else-if="props.widget.kind === SensorWidgetKind.Sensor">
         <select v-model="model" class="slot mb-2">
           <option value=""></option>
@@ -41,11 +43,7 @@
         </select>
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Moment">
-        <Moment
-          v-model="momentModel"
-          :editing="props.editing"
-          class="slot mb-2"
-        />
+        <Moment v-model="momentModel" :editing="props.editing" class="slot mb-2" />
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Map">
         <span v-for="(m, index) in model" :key="JSON.stringify((m as MapElement).key)" class="flex">
@@ -101,14 +99,10 @@
         <p class="slot mb-2">{{ props.sensorsDisplay.find((s) => s.localPk === model)?.alias }}</p>
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Seconds">
-        <p class="slot mb-2">{{ model }} second{{ (model && model > 1) ? "s" : "" }}</p>
+        <p class="slot mb-2">{{ model }} second{{ model && model > 1 ? 's' : '' }}</p>
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Moment">
-        <Moment
-          v-model="momentModel"
-          :editing="props.editing"
-          class="slot mb-2"
-        />
+        <Moment v-model="momentModel" :editing="props.editing" class="slot mb-2" />
       </template>
       <template v-else-if="props.widget.kind === SensorWidgetKind.Map">
         <span v-for="m in model" :key="JSON.stringify((m as MapElement).key)" class="flex">
@@ -174,30 +168,30 @@ const props = defineProps<{
 
 const model = computed({
   get() {
-    return props.modelValue;
+    return props.modelValue
   },
   set(value) {
     emit('update:modelValue', value)
   }
-});
+})
 
 const numModel = computed({
   get() {
-    return props.modelValue as number | null;
+    return props.modelValue as number | null
   },
   set(value) {
     emit('update:modelValue', value)
   }
-});
+})
 
 const momentModel = computed({
   get() {
-    return props.modelValue as MomentElement | null;
+    return props.modelValue as MomentElement | null
   },
   set(value) {
     emit('update:modelValue', value)
   }
-});
+})
 const addToMap = () => {
   if (!Array.isArray(model.value)) {
     throw new Error(

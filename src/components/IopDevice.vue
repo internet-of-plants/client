@@ -116,7 +116,7 @@ const load = async () => {
         deviceId: d.id
       })
 
-      document.title = `${d.name ?? d.mac}`
+      document.title = d.name ?? d.mac
 
       break
     }

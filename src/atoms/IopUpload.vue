@@ -41,7 +41,7 @@
         <div class="flex flex-row text-sm">
           <div class="flex flex-col">
             <span v-for="request in target.configurationRequests" :key="request.id">
-              {{ request.humanName }}:
+              {{ request.name }}:
             </span>
           </div>
 
@@ -162,7 +162,7 @@
               :key="`${index}-${request.id}`"
               class="mb-2 mr-2 slot"
             >
-              <span v-if="request.id !== null">{{ request?.humanName }}</span>
+              <span v-if="request.id !== null">{{ request?.name }}</span>
               <span v-else></span>
             </span>
           </span>
@@ -395,11 +395,11 @@ const alignedSensors = computed<[number, SensorDisplay][]>(() => {
 
 const alignedSensorConfigRequestNames = computed<[number, ConfigRequest | { id: null }][]>(() => {
   return Object.entries(sensorsDisplay.value).flatMap(([index, sensor]) => {
-    const prototype = sensorPrototype(sensor.prototypeId);
+    const prototype = sensorPrototype(sensor.prototypeId)
 
     const requests = []
     for (const request of prototype?.configurationRequests ?? []) {
-      requests.push(request);
+      requests.push(request)
 
       // For each line of the array/map we have to add a blank line for the request names
       // Otherwise things get misaligned
@@ -409,8 +409,8 @@ const alignedSensorConfigRequestNames = computed<[number, ConfigRequest | { id: 
         element.slice(Number(!customizeCompiler.value)).forEach(() => {
           requests.push({
             id: null
-          });
-        });
+          })
+        })
       }
     }
     return requests.map((request) => [index as unknown, request]) as [
@@ -422,10 +422,10 @@ const alignedSensorConfigRequestNames = computed<[number, ConfigRequest | { id: 
 
 const alignedSensorConfigRequestValues = computed<[number, ConfigRequest][]>(() => {
   return Object.entries(sensorsDisplay.value).flatMap(([index, sensor]) => {
-    const prototype = sensorPrototype(sensor.prototypeId);
-    const requests = [];
+    const prototype = sensorPrototype(sensor.prototypeId)
+    const requests = []
     for (const request of prototype?.configurationRequests ?? []) {
-      requests.push(request);
+      requests.push(request)
     }
     return requests.map((request) => [index as unknown as number, request]) as [
       number,
@@ -616,23 +616,23 @@ async function fetchSensorPrototypes(targetId: number) {
   sensorPrototypes.value = []
   sensorPrototypes.value = await SensorPrototypeService.listForTarget(targetId)
 
-  if (!compiler.value) throw new Error("no compiler set");
-
   sensorConfigs.value =
-    compiler.value.sensors
+    compiler.value?.sensors
       .flatMap(
         (sensor: Sensor) =>
           sensor.configurations.map((c: Config) => [sensor, c]) as [Sensor, Config][]
       )
       .map(([sensor, config]: [Sensor, Config]) => {
         if (config.request.ty.widget.kind === SensorWidgetKind.Sensor) {
-          const localSensor = sensorsDisplay.value.find((s) => s.sensorId === (config.value as { sensorId: number }).sensorId)
+          const localSensor = sensorsDisplay.value.find(
+            (s) => s.sensorId === (config.value as { sensorId: number }).sensorId
+          )
           if (!localSensor) throw new Error(`unable to find sensor ${config.value}`)
           config.value = localSensor.localPk
         }
         return { [`${sensor.index}-${config.request.id}`]: config.value }
       })
-      .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+      .reduce((acc, curr) => ({ ...acc, ...curr }), {}) ?? {}
 }
 
 const saveColor = async (color: string | null, sensorId?: number) => {
@@ -651,9 +651,7 @@ const saveColor = async (color: string | null, sensorId?: number) => {
 const targetName = (target: Target) => {
   if (!target) return ''
 
-  return `${target.arch}${target.board ? '-' + target.board : ''}${
-    target.name ? '-' + target.name : ''
-  }`
+  return `${target.arch}${target.board ? '-' + target.board : ''}`
 }
 
 const saveAlias = async (alias: string, sensorId?: number) => {

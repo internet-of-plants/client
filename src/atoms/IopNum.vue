@@ -12,9 +12,9 @@
 import { computed } from 'vue'
 
 const props = defineProps<{
-  modelValue: number | null;
-  isFloat?: boolean;
-  isUnsigned?: boolean;
+  modelValue: number | null
+  isFloat?: boolean
+  isUnsigned?: boolean
 }>()
 
 const isNumber = (event: KeyboardEvent | ClipboardEvent) => {

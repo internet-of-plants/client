@@ -246,16 +246,12 @@ const groupedEvents = computed<Record<number, NormalizedEvent>>(() => {
 
     for (const obj of Object.values(object)) {
       if (!normalized.createdAt) normalized.createdAt = obj.createdAt
-      if (!normalized.metadatas) normalized.metadatas = obj.metadatas
+      if (normalized.metadatas.length === 0) normalized.metadatas = obj.metadatas
 
       for (const [key, value] of Object.entries(obj.measurements)) {
-        const decimalPlaces = value.reduce(
-          (acc, v) => Math.max((v.toString().split('.')[1]?.length ?? 1) - 1, acc),
-          0
+        normalized.measurements[key] = formatDecimalPlaces(
+          value.reduce((acc, v) => acc + v / value.length, 0)
         )
-        normalized.measurements[key] = value
-          .reduce((acc, v) => acc + v / value.length, 0)
-          .toFixed(decimalPlaces + 1)
       }
 
       for (const [key, value] of Object.entries(obj.stats)) {
@@ -264,13 +260,9 @@ const groupedEvents = computed<Record<number, NormalizedEvent>>(() => {
           continue
         }
 
-        const decimalPlaces = value.reduce(
-          (acc: number, v) => Math.max((v?.toString().split('.')[1]?.length ?? 1) - 1, acc),
-          0
+        normalized.stat[key] = formatDecimalPlaces(
+          (value as number[]).reduce((acc, v) => acc + v / value.length, 0)
         )
-        normalized.stat[key] = (value as number[])
-          .reduce((acc, v) => acc + v / value.length, 0)
-          .toFixed(decimalPlaces + 1)
       }
     }
 
@@ -293,28 +285,28 @@ watch(since, async (value) => {
   const now = new Date()
   switch (value) {
     case 'past-1-day':
-      start = pastDays(1);
-      break;
+      start = pastDays(1)
+      break
     case 'today':
-      start = pastDays(0);
-      break;
+      start = pastDays(0)
+      break
     case 'past-3-days':
-      start = pastDays(3);
-      break;
+      start = pastDays(3)
+      break
     case 'past-7-days':
-      start = pastDays(7);
-      break;
+      start = pastDays(7)
+      break
     case 'past-30-days':
-      start = pastDays(30);
-      break;
+      start = pastDays(30)
+      break
     case 'this-week':
-      start = pastDays(now.getDay());
-      break;
+      start = pastDays(now.getDay())
+      break
     case 'this-month':
-      start = pastDays(now.getDate());
-      break;
+      start = pastDays(now.getDate())
+      break
     default:
-      throw new Error('unknown since: ' + value);
+      throw new Error('unknown since: ' + value)
   }
 
   if (!start) throw new Error('failed to get time')
@@ -349,7 +341,7 @@ const generateColor = () => {
 
 interface Metadata {
   ty: MeasurementType
-  humanName: string
+  name: string
   stat: boolean
   color: string | null
 }
@@ -360,17 +352,15 @@ const metadatas = computed<Record<string, Metadata>>(() => {
   for (const event of Object.values(groupedEvents.value)) {
     if (event.metadatas.length !== 0) {
       for (const metadata of event.metadatas) {
-        if (obj[metadata.name]) continue
+        if (obj[metadata.variableName]) continue
         const sensorAlias = alias(metadata.name)
 
         if (!props.showStale && !sensorAlias) continue
 
-        const humanName = sensorAlias
-          ? `${sensorAlias} - ${metadata.humanName}`
-          : metadata.humanName
-        obj[metadata.name] = {
+        const name = sensorAlias ? `${sensorAlias} - ${metadata.name}` : metadata.name
+        obj[metadata.variableName] = {
           ty: metadata.ty,
-          humanName,
+          name,
           stat: false,
           color: color(metadata.name) ?? metadata.color
         }
@@ -382,7 +372,7 @@ const metadatas = computed<Record<string, Metadata>>(() => {
         if (obj[name]) continue
         obj[name] = {
           ty: MeasurementType.Unknown,
-          humanName: name,
+          name,
           stat: false,
           color: null
         }
@@ -391,34 +381,34 @@ const metadatas = computed<Record<string, Metadata>>(() => {
 
     obj['freeDram'] = {
       ty: MeasurementType.Heap,
-      humanName: 'Free DRAM',
+      name: 'Free DRAM',
       stat: true,
       color: '#fff176'
     }
     if (event.stat.freeIram) {
       obj['freeIram'] = {
         ty: MeasurementType.Heap,
-        humanName: 'Free IRAM',
+        name: 'Free IRAM',
         stat: true,
         color: '#4cb050'
       }
     }
     obj['freeStack'] = {
       ty: MeasurementType.Stack,
-      humanName: 'Free STACK',
+      name: 'Free STACK',
       stat: true,
       color: '#64b5f6'
     }
     obj['biggestDramBlock'] = {
       ty: MeasurementType.Heap,
-      humanName: 'Biggest DRAM Block',
+      name: 'Biggest DRAM Block',
       stat: true,
       color: '#ffab91'
     }
     if (event.stat.biggestIramBlock) {
       obj['biggestIramBlock'] = {
         ty: MeasurementType.Heap,
-        humanName: 'Biggest IRAM Block',
+        name: 'Biggest IRAM Block',
         stat: true,
         color: '#008781'
       }
@@ -510,7 +500,7 @@ const chartOptions = (ty: MeasurementType): ChartOptions => {
           label: (context) => {
             let value = `${context.formattedValue}`
             const field = context.dataset.label
-            const metadata = Object.values(metadatas.value).find((m) => m.humanName === field)
+            const metadata = Object.values(metadatas.value).find((m) => m.name === field)
             switch (metadata?.ty) {
               case MeasurementType.Percentage:
                 value += '%'
@@ -527,7 +517,7 @@ const chartOptions = (ty: MeasurementType): ChartOptions => {
                 value += 'B'
                 break
             }
-            return `${metadata?.humanName ?? field}: ${value}`
+            return `${metadata?.name ?? field}: ${value}`
           }
         }
       }
@@ -544,7 +534,7 @@ const chartData = (ty: MeasurementType): ChartData => {
 
     if (!metadata.stat) {
       datasets.push({
-        label: metadata.humanName,
+        label: metadata.name,
         yAxisID: metadata.ty,
         data,
         backgroundColor: metadata.color ? metadata.color : generateColor(),
@@ -555,7 +545,7 @@ const chartData = (ty: MeasurementType): ChartData => {
       })
     } else {
       datasets.push({
-        label: metadata.humanName,
+        label: metadata.name,
         yAxisID: metadata.ty,
         data,
         backgroundColor: metadata.color ? metadata.color : generateColor(),
@@ -590,6 +580,11 @@ const charts = computed<[ChartData<'line'>, ChartOptions][]>(() => {
 
   return pair as [ChartData<'line'>, ChartOptions][]
 })
+
+function formatDecimalPlaces(value: number) {
+  const decimalPlaces = Math.max((value.toString().split('.')[1]?.length ?? 1) - 1, 0)
+  return value.toFixed(Math.min(decimalPlaces, 2))
+}
 </script>
 
 <style scoped lang="scss"></style>
