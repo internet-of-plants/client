@@ -211,7 +211,7 @@ export interface Device {
   id: number
   name: string
   description: string | null
-  target: Target | null
+  targetPrototype: TargetPrototype
   sensors: Sensor[]
   mac: string
   fileHash: string
@@ -228,6 +228,7 @@ export interface Collection {
   description: string | null
   compiler: Compiler | null
   devices: Device[]
+  targetPrototype: TargetPrototype
   createdAt: string
   updatedAt: string
 }

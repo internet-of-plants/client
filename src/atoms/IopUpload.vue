@@ -683,8 +683,8 @@ const updateTargetEvent = async (event: Event) => {
 }
 
 const load = async () => {
-  targets.value = await TargetService.list()
   targetId.value = props.collection.compiler?.target.id
+  targets.value = await TargetService.list({ prototypeId: props.collection.targetPrototype.id })
   compilerId.value = props.collection.compiler?.id ?? ''
 }
 
