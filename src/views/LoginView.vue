@@ -1,7 +1,7 @@
 <template>
-  <Login />
+  <IopLogin />
 </template>
 
 <script setup lang="ts">
-import Login from '@/components/IopLogin.vue'
+import IopLogin from '@/components/IopLogin.vue'
 </script>

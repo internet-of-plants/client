@@ -1,6 +1,6 @@
 <template>
   <div class="w-full flex justify-center">
-    <div class="flex flex-row">
+    <div class="flex flex-row w-full">
       <div v-if="collection" class="flex flex-col items-center">
         <Name
           v-model="deviceName"
@@ -11,8 +11,8 @@
 
         <span class="flex mt-5">
           <Upload
-            v-if="device && parsedOrganizationId"
-            :organization-id="parsedOrganizationId"
+            v-if="device && organization"
+            :organization-id="organization.id"
             :collection="collection"
             :deviceId="device.id"
             :editing="editing"
@@ -42,7 +42,7 @@
               v-if="device?.lastEvent?.measurements"
               :editing="editing"
               :device="device"
-              class="mb-7"
+              class="mb-5"
             />
             <Logs v-if="logs.length > 0" :logs="logs" class="box log-panel" />
           </span>
@@ -63,7 +63,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import type { DevicePanic, DeviceLog, Collection } from '@/models'
 import Logs from '@/atoms/IopLogs.vue'
 import Panics from '@/atoms/IopPanics.vue'
@@ -76,52 +76,63 @@ import router from '@/router'
 import PanicService from '@/api/panic'
 import LogService from '@/api/log'
 import DeviceService from '@/api/device'
-import OrganizationService from '@/api/organization'
+import { useOrganizationStore } from '@/stores/organization'
+
+const props = defineProps<{
+  organizationId?: number
+  collectionId?: number
+  deviceId?: number
+}>()
 
 const editing = ref(false)
+const route = useRoute()
 
-const { organizationId, collectionId, deviceId } = useRoute().params
+const organizationStore = useOrganizationStore()
+organizationStore.FETCH_ORGANIZATIONS()
 
-let parsedOrganizationId = ref<number | null>(null)
-try {
-  parsedOrganizationId.value = parseInt(organizationId as string)
-} catch (_err) {
-  router.push({ path: '/' })
-}
-
-const collection = ref<Collection | null>(null)
-const device = computed(() => collection.value?.devices.find((d) => `${d.id}` === deviceId))
+const organization = computed(
+  () =>
+    organizationStore.organizations?.find((o) => {
+      if (props.organizationId) return o.id === props.organizationId
+      return `${o.id}` === route.params.organizationId
+    }) ?? null
+)
+const collection = computed(
+  () =>
+    organization.value?.collections.find((c) => {
+      if (props.collectionId) return c.id === props.collectionId
+      return `${c.id}` === route.params.collectionId
+    }) ?? null
+)
+const device = computed(
+  () =>
+    collection.value?.devices.find((d) => {
+      if (props.deviceId) return d.id === props.deviceId
+      return `${d.id}` === route.params.deviceId
+    }) ?? null
+)
 const logs = ref<DeviceLog[]>([])
 const panics = ref<DevicePanic[]>([])
-const deviceName = computed(() => device.value?.name ?? null)
+const deviceName = ref<string | null>(null)
 
-const load = async () => {
-  if (!parsedOrganizationId.value) throw new Error('invalid collection')
+watch(device, async (d) => {
+  if (!d) return
 
-  const organization = await OrganizationService.find(parsedOrganizationId.value)
+  logs.value = await LogService.list({
+    limit: 200,
+    deviceId: d.id
+  })
 
-  for (const c of organization.collections) {
-    if (`${c.id}` !== collectionId) continue
-    collection.value = c
+  panics.value = await PanicService.list({
+    deviceId: d.id
+  })
 
-    for (const d of c.devices) {
-      if (`${d.id}` !== deviceId) continue
-
-      logs.value = await LogService.list({
-        limit: 200,
-        deviceId: d.id
-      })
-
-      panics.value = await PanicService.list({
-        deviceId: d.id
-      })
-
-      document.title = d.name ?? d.mac
-
-      break
-    }
+  if (!deviceName.value) {
+    deviceName.value = d.name
   }
-}
+
+  document.title = d.name ?? d.mac
+})
 
 const saveName = async () => {
   if (!device.value || !deviceName.value || deviceName.value === device.value.name) return
@@ -132,16 +143,15 @@ const saveName = async () => {
   })
 }
 
-onMounted(load)
+const load = () => {
+  organizationStore.FETCH_ORGANIZATIONS()
+}
 </script>
 
 <style scoped lang="scss">
-a {
-  color: #42b983;
-}
 .box {
   border: solid 1px #626262;
-  padding: 25px;
+  padding: 20px;
   height: min-content;
 }
 body {
@@ -155,8 +165,9 @@ body {
   margin: 0;
 }
 .log-panel {
-  height: 20em;
+  height: 12em;
   overflow: auto;
+  max-width: 25vw;
 }
 input {
   background-color: #dfdfdf;

@@ -1,103 +1,55 @@
 <template>
-  <div id="nav" class="w-full text-center pt-5">
-    <RouterLink
-      v-if="isAuthenticated"
-      class="link text-xl"
-      :class="selected('Organizations')"
-      to="/"
-      >All Organizations</RouterLink
-    >
-    <RouterLink
-      v-if="isAuthenticated && organizationId"
-      class="link text-xl"
-      :class="selected('Organization')"
-      :to="`/organization/${organizationId}`"
-      >Current Organization</RouterLink
-    >
-    <RouterLink
-      v-if="isAuthenticated && collectionId"
-      class="link text-xl"
-      :class="selected('Collection')"
-      :to="`/organization/${organizationId}/collection/${collectionId}`"
-      >Current Collection</RouterLink
-    >
-    <RouterLink v-if="!isAuthenticated" class="link text-xl" :class="selected('Login')" to="/login"
-      >Login</RouterLink
-    >
-    <RouterLink
-      v-if="!isAuthenticated"
-      class="link text-xl"
-      :class="selected('Signup')"
-      to="/signup"
-      >Signup</RouterLink
-    >
-    <slot name="router"></slot>
-  </div>
-  <div class="content">
-    <RouterView />
-  </div>
-  <div class="flex flex-col w-full footer px-5">
-    <a href="https://www.flaticon.com/free-icons/soil" title="soil icons"
-      >Soil icons created by Smashicons - Flaticon</a
-    >
-    <a href="https://www.flaticon.com/free-icons/hot" title="hot icons"
-      >Hot icons created by Freepik - Flaticon</a
-    >
-    <a href="https://www.flaticon.com/free-icons/evaporation" title="evaporation icons"
-      >Evaporation icons created by Smashicons - Flaticon</a
-    >
-    <a href="https://www.flaticon.com/free-icons/plant" title="plant icons"
-      >Plant icons created by Freepik - Flaticon</a
-    >
-  </div>
+  <span class="flex flex-col w-full h-full">
+    <span class="flex flex-row w-full content-header">
+      <SideBar v-if="organizationStore.organizations && organizationStore.organizations.length > 0" />
+      <div class="overflow-x-scroll py-10 w-full">
+        <RouterView />
+      </div>
+    </span>
+    <div class="flex flex-col w-full footer px-5 border-t border-black pt-3">
+      <a href="https://www.flaticon.com/free-icons/soil" title="soil icons"
+        >Soil icons created by Smashicons - Flaticon</a
+      >
+      <a href="https://www.flaticon.com/free-icons/hot" title="hot icons"
+        >Hot icons created by Freepik - Flaticon</a
+      >
+      <a href="https://www.flaticon.com/free-icons/evaporation" title="evaporation icons"
+        >Evaporation icons created by Smashicons - Flaticon</a
+      >
+      <a href="https://www.flaticon.com/free-icons/plant" title="plant icons"
+        >Plant icons created by Freepik - Flaticon</a
+      >
+    </div>
+  </span>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { useOrganizationStore } from '@/stores/organization'
+import SideBar from '@/components/SideBar.vue'
 import '@/tailwind.css'
 
-const organizationId = computed(() => useRoute().params.organizationId)
-const collectionId = computed(() => useRoute().params.collectionId)
-const deviceId = computed(() => useRoute().params.deviceId)
+const route = useRoute()
+const organizationId = computed(() => route.params.organizationId)
+const collectionId = computed(() => route.params.collectionId)
+const deviceId = computed(() => route.params.deviceId)
 
-const selected = (route: string) => {
-  switch (route) {
-    case 'Organizations':
-      if (!organizationId.value) {
-        return ['selected']
-      }
-      break
-    case 'Organization':
-      if (organizationId.value && !collectionId.value) {
-        return ['selected']
-      }
-      break
-    case 'Collection':
-      if (collectionId.value && !deviceId.value) {
-        return ['selected']
-      }
-      break
-    case 'Signup':
-      if (useRoute().path === '/signup') {
-        return ['selected']
-      }
-      break
-    case 'Login':
-      if (useRoute().path === '/login') {
-        return ['selected']
-      }
-      break
-  }
-  return []
-}
+const userStore = useUserStore()
+const organizationStore = useOrganizationStore()
 
-const isAuthenticated = ref(!!localStorage.getItem('token'))
 const updateAuthenticated = () => {
-  isAuthenticated.value = !!localStorage.getItem('token')
+  userStore.isAuthenticated = !!localStorage.getItem('token')
+  if (userStore.isAuthenticated) userStore.FETCH_USER()
 }
 onMounted(() => window.addEventListener('storage', updateAuthenticated))
 onUnmounted(() => window.removeEventListener('storage', updateAuthenticated))
+
+updateAuthenticated();
+
+if (userStore.isAuthenticated) organizationStore.FETCH_ORGANIZATIONS()
+if (userStore.isAuthenticated) userStore.FETCH_USER()
 </script>
 
 <style lang="scss">
@@ -118,33 +70,24 @@ input {
   border-radius: 3px;
   padding-left: 5px;
 }
-.link {
-  padding: 30px;
-  text-align: center;
+.vc-color-wrap {
+  height: 20px !important;
 }
-.content {
-  height: calc(100vh - 17em);
-  overflow-x: scroll;
+a {
+  /* color: inherit !important; */
+  color: #42b983;
+  text-decoration: none;
 }
-.selected {
+a:hover {
   color: green;
+}
+</style>
+
+<style scoped lang="scss">
+.content-header {
+  height: calc(100vh - 7em);
 }
 .footer {
   height: 7em;
-}
-#nav {
-  height: 10em;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
-.vc-color-wrap {
-  height: 20px !important;
 }
 </style>

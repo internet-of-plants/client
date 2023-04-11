@@ -33,7 +33,9 @@
           <option v-if="compiler && compiler.devicesCount > 1" value="">new</option>
           <option v-for="c in compilers" :key="c.id" :value="c.id">{{ c.collectionName }}</option>
         </select>
-        <span v-else-if="compiler">Collection: {{ compiler.collectionName }}</span>
+        <span v-else-if="compiler && compiler.collectionName != props.collection.name"
+          >Collection: {{ compiler.collectionName }}</span
+        >
       </div>
 
       <div v-if="target && deviceConfigs" class="mt-2">
@@ -209,6 +211,10 @@
         />
       </svg>
     </span>
+
+    <span v-if="compiler && !props.editing" class="float-right">
+      <RouterLink :to="`/compiler/${compiler.id}/code`"> View Source Code </RouterLink>
+    </span>
   </span>
 </template>
 
@@ -232,6 +238,7 @@ import type { NewCompiler } from '@/api/compiler'
 import SensorPrototypeService from '@/api/sensor_prototype'
 import SensorService from '@/api/sensor'
 import { ColorPicker } from 'vue3-colorpicker'
+import { useOrganizationStore } from '@/stores/organization'
 import 'vue3-colorpicker/style.css'
 
 const props = defineProps<{
@@ -241,7 +248,7 @@ const props = defineProps<{
   editing: boolean
 }>()
 
-const emit = defineEmits(['refresh'])
+const organizationStore = useOrganizationStore()
 
 const loading = ref(false)
 const targets = ref<Target[] | null>(null)
@@ -597,7 +604,8 @@ const create = async () => {
   }
 
   loading.value = false
-  emit('refresh')
+
+  organizationStore.FETCH_ORGANIZATIONS()
 }
 
 async function fetchCompilers(id: number) {
@@ -645,7 +653,7 @@ const saveColor = async (color: string | null, sensorId?: number) => {
     color
   })
 
-  emit('refresh')
+  organizationStore.FETCH_ORGANIZATIONS()
 }
 
 const targetName = (target: Target) => {
@@ -664,7 +672,7 @@ const saveAlias = async (alias: string, sensorId?: number) => {
     alias
   })
 
-  emit('refresh')
+  organizationStore.FETCH_ORGANIZATIONS()
 }
 
 const updateTarget = async (id: number | undefined) => {

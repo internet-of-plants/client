@@ -1,7 +1,7 @@
 <template>
-  <Device />
+  <IopDevice />
 </template>
 
 <script setup lang="ts">
-import Device from '@/components/IopDevice.vue'
+import IopDevice from '@/components/IopDevice.vue'
 </script>

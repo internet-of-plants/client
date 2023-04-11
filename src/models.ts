@@ -6,6 +6,7 @@ export interface Compiler {
   devicesCount: number
   target: Target
   latestFirmware: Firmware
+  latestCompilation: Compilation
 }
 
 export interface DeviceConfig {
@@ -279,6 +280,13 @@ export interface DeviceStat {
   freeStack: number
   biggestDramBlock: number
   biggestIramBlock: number | null
+}
+
+export interface User {
+  id: number
+  email: string
+  username: string
+  defaultOrganization: Organization
 }
 
 //export interface ChartOptions {

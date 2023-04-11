@@ -65,3 +65,21 @@ export async function post<T>(route: string, body?: Body): Promise<T> {
 
   return await response.json()
 }
+
+export async function postRaw<T>(route: string, body?: Body): Promise<string> {
+  const headers: Record<string, string> = {}
+  let newBody
+  if (body !== undefined && !(body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json'
+    newBody = JSON.stringify(body)
+  } else {
+    newBody = body
+  }
+  const response = await fetch(`${config.API_HOST}${route}`, {
+    method: 'POST',
+    body: newBody,
+    headers
+  })
+
+  return await response.text()
+}

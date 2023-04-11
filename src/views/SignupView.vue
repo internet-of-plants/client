@@ -1,7 +1,7 @@
 <template>
-  <Signup />
+  <IopSignup />
 </template>
 
 <script setup lang="ts">
-import Signup from '@/components/IopSignup.vue'
+import IopSignup from '@/components/IopSignup.vue'
 </script>

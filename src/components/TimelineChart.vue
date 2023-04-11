@@ -16,10 +16,4 @@ const props = defineProps<{
 //onMounted(() => this.renderChart(this.data, this.options));
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-a {
-  color: inherit !important;
-  text-decoration: none;
-}
-</style>
+<style scoped lang="scss"></style>

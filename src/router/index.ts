@@ -1,36 +1,42 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import OrganizationsView from '@/views/OrganizationsView.vue'
-import CollectionsView from '@/views/CollectionsView.vue'
-import DevicesView from '@/views/DevicesView.vue'
+import OrganizationView from '@/views/OrganizationView.vue'
+import CollectionView from '@/views/CollectionView.vue'
 import DeviceView from '@/views/DeviceView.vue'
 import LoginView from '@/views/LoginView.vue'
 import SignupView from '@/views/SignupView.vue'
+import CompilerView from '@/views/CompilerView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    name: 'OrganizationsView',
-    meta: { title: 'Organizations' },
-    component: OrganizationsView
-  },
-  {
     path: '/organization/:organizationId',
-    name: 'CollectionsView',
-    meta: { title: 'Collections' },
-    component: CollectionsView
+    name: 'OrganizationView',
+    meta: { title: 'Organization' },
+    component: OrganizationView
   },
   {
     path: '/organization/:organizationId/collection/:collectionId',
     name: 'DevicesView',
     meta: { title: 'Devices' },
-    component: DevicesView
+    component: CollectionView
   },
   {
     path: '/organization/:organizationId/collection/:collectionId/device/:deviceId',
     name: 'DeviceView',
     meta: { title: 'Device' },
     component: DeviceView
+  },
+  {
+    path: '/compiler/:compilerId/code',
+    name: 'CompilerView',
+    meta: { title: 'Compiler' },
+    component: CompilerView
+  },
+  {
+    path: '/',
+    name: 'Home',
+    meta: { title: 'Login' },
+    component: LoginView
   },
   {
     path: '/login',

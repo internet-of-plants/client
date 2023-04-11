@@ -5,7 +5,7 @@
 
       <div
         v-if="props.device.lastEvent"
-        class="flex flex-row flex-wrap justify-center w-full measurements"
+        class="flex flex-row flex-wrap justify-center measurements"
       >
         <span
           v-for="([key, value], index) in Object.entries(props.device.lastEvent.measurements)"
@@ -14,26 +14,26 @@
         >
           <img
             v-if="metadata(key)?.kind === MeasurementKind.SoilTemperature"
-            class="w-16 h-16 self-center"
+            class="w-14 h-14 self-center"
             src="/soil-temperature.png"
           />
           <img
             v-else-if="metadata(key)?.kind === MeasurementKind.SoilMoisture"
-            class="w-16 h-16 p-2.5 self-center"
+            class="w-14 h-14 p-2.5 self-center"
             src="/soil-moisture.png"
           />
           <img
             v-else-if="metadata(key)?.kind === MeasurementKind.AirTemperature"
-            class="w-16 h-16 p-3 self-center"
+            class="w-14 h-14 p-3 self-center"
             src="/air-temperature.png"
           />
           <img
             v-else-if="metadata(key)?.kind === MeasurementKind.AirHumidity"
-            class="w-16 h-16 p-3.5 self-center"
+            class="w-14 h-14 p-3.5 self-center"
             src="/air-humidity.png"
           />
-          <span class="text-center text-xl"> {{ formatDecimalPlaces(value) }}{{ unit(key) }} </span>
-          <p class="text-center" v-for="line in name(key).split('\n')" :key="line">
+          <span class="text-center text-l"> {{ formatDecimalPlaces(value) }}{{ unit(key) }} </span>
+          <p class="text-center text-sm" v-for="line in name(key).split('\n')" :key="line">
             {{ line }}
           </p>
           <span
@@ -101,10 +101,11 @@ function formatDecimalPlaces(value: number) {
 <style lang="scss" scoped>
 .box {
   border: solid 1px #626262;
-  padding: 25px;
+  padding: 20px;
   height: min-content;
 }
-.measurements {
-  max-width: 27vw;
+.measurements,
+.box {
+  max-width: 25vw;
 }
 </style>
