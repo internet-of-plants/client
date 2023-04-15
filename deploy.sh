@@ -2,7 +2,7 @@
 
 SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
-npm run build
+NODE_ENV='production' npm run build
 if [  $? -ne 0 ]; then
   echo "Build failed"
   exit
