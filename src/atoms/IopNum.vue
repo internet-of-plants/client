@@ -12,7 +12,7 @@
 import { computed } from 'vue'
 
 const props = defineProps<{
-  modelValue: number | null
+  modelValue: number | null | ''
   isFloat?: boolean
   isUnsigned?: boolean
 }>()
@@ -39,7 +39,7 @@ const isNumber = (event: KeyboardEvent | ClipboardEvent) => {
 const emit = defineEmits(['update:modelValue'])
 const model = computed({
   get() {
-    return props.modelValue
+    return props.modelValue === '' ? null : props.modelValue
   },
   set(value) {
     emit('update:modelValue', value)
