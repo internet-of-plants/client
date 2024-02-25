@@ -174,7 +174,7 @@
             <span
               v-for="[index, request] in alignedSensorConfigRequestValues"
               :key="`${index}-${request.id}`"
-              class="mb-2 mr-2 slot"
+              :class="{ slot: request.id === null, 'mb-2': request.id === null }"
             >
               <SensorWidgets
                 v-if="request.id !== null && request.ty !== null && sensorPrototypes"
