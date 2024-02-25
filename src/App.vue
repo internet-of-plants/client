@@ -1,7 +1,9 @@
 <template>
   <span class="flex flex-col w-full h-full">
     <span class="flex flex-row w-full content-header">
-      <SideBar v-if="organizationStore.organizations && organizationStore.organizations.length > 0" />
+      <SideBar
+        v-if="organizationStore.organizations && organizationStore.organizations.length > 0"
+      />
       <div class="overflow-x-scroll py-10 w-full">
         <RouterView />
       </div>
@@ -46,7 +48,7 @@ const updateAuthenticated = () => {
 onMounted(() => window.addEventListener('storage', updateAuthenticated))
 onUnmounted(() => window.removeEventListener('storage', updateAuthenticated))
 
-updateAuthenticated();
+updateAuthenticated()
 
 if (userStore.isAuthenticated) organizationStore.FETCH_ORGANIZATIONS()
 if (userStore.isAuthenticated) userStore.FETCH_USER()

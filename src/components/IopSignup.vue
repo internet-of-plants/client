@@ -1,7 +1,10 @@
 <template>
   <div v-if="!userStore.isAuthenticated" class="signup flex w-full flex-row items-center">
     <div class="w-full flex flex-col items-center p">
-      <span class="text-center flex flex-row p-5">If you already have an account, <RouterLink to="/login"><button>Login</button></RouterLink> here</span>
+      <span class="text-center flex flex-row p-5"
+        >If you already have an account,
+        <RouterLink to="/login"><button>Login</button></RouterLink> here</span
+      >
       <div class="items-center flex flex-col w-full">
         <form class="border border-black rounded-sm p-5 flex flex-col" @submit.prevent>
           <div>
@@ -23,7 +26,12 @@
           </div>
           <div class="pt-1">
             <label for="password">Password:</label>
-            <input class="float-right ml-2" type="password" name="password" v-model="user.password" />
+            <input
+              class="float-right ml-2"
+              type="password"
+              name="password"
+              v-model="user.password"
+            />
           </div>
           <button class="mt-2" v-on:click="signup()">Signup</button>
         </form>
@@ -64,7 +72,8 @@ const signup = async () => {
   height: 60vh;
   margin-bottom: 24vh;
 }
-a, button {
+a,
+button {
   color: inherit;
 }
 a {

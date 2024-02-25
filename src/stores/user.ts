@@ -10,7 +10,7 @@ export const useUserStore = defineStore('user', () => {
     user.value = await UserService.find()
   }
 
-  const isAuthenticated = ref(false);
+  const isAuthenticated = ref(false)
 
   return { user, FETCH_USER, isAuthenticated }
 })

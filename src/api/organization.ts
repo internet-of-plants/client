@@ -6,6 +6,6 @@ async function list(): Promise<Organization[]> {
 }
 
 const OrganizationService = {
-  list,
+  list
 }
 export default OrganizationService

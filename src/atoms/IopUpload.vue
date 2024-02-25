@@ -164,7 +164,7 @@
               :key="`${index}-${request.id}`"
               class="mb-2 mr-2 slot"
             >
-              <span v-if="request.id !== null">{{ request?.name }}</span>
+              <span v-if="request.id !== null">{{ request.name }}</span>
               <span v-else></span>
             </span>
           </span>
@@ -174,6 +174,7 @@
             <span
               v-for="[index, request] in alignedSensorConfigRequestValues"
               :key="`${index}-${request.id}`"
+              class="mb-2 mr-2 slot"
             >
               <SensorWidgets
                 v-if="request.id !== null && request.ty !== null && sensorPrototypes"
@@ -405,6 +406,11 @@ const alignedSensorConfigRequestNames = computed<[number, ConfigRequest | { id: 
     const prototype = sensorPrototype(sensor.prototypeId)
 
     const requests = []
+
+    if (!prototype?.configurationRequests.length) {
+      requests.push({ id: null })
+    }
+
     for (const request of prototype?.configurationRequests ?? []) {
       requests.push(request)
 
@@ -427,16 +433,21 @@ const alignedSensorConfigRequestNames = computed<[number, ConfigRequest | { id: 
   })
 })
 
-const alignedSensorConfigRequestValues = computed<[number, ConfigRequest][]>(() => {
+const alignedSensorConfigRequestValues = computed<[number, ConfigRequest | { id: null }][]>(() => {
   return Object.entries(sensorsDisplay.value).flatMap(([index, sensor]) => {
     const prototype = sensorPrototype(sensor.prototypeId)
     const requests = []
+
+    if (!prototype?.configurationRequests.length) {
+      requests.push({ id: null })
+    }
+
     for (const request of prototype?.configurationRequests ?? []) {
       requests.push(request)
     }
     return requests.map((request) => [index as unknown as number, request]) as [
       number,
-      ConfigRequest
+      ConfigRequest | { id: null }
     ][]
   })
 })

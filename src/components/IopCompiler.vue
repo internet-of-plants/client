@@ -17,11 +17,14 @@ organizationStore.FETCH_ORGANIZATIONS()
 
 const route = useRoute()
 
-const compiler = computed(() => organizationStore.organizations?.flatMap((o) => {
-  return o.collections.map((c) => c.compiler);
-}).find((c) => `${c?.id}` === route.params.compilerId) ?? null);
-
+const compiler = computed(
+  () =>
+    organizationStore.organizations
+      ?.flatMap((o) => {
+        return o.collections.map((c) => c.compiler)
+      })
+      .find((c) => `${c?.id}` === route.params.compilerId) ?? null
+)
 </script>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>
