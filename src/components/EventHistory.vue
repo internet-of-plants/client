@@ -568,6 +568,7 @@ const charts = computed<[ChartData<'line'>, ChartOptions][]>(() => {
       .flatMap((e) => Object.values(e.metadatas))
       .map((m) => m.ty)
   )
+  types.add(MeasurementType.Unknown)
   types.add(MeasurementType.Heap)
   types.add(MeasurementType.Stack)
 
