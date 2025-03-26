@@ -289,7 +289,7 @@ function randomString(size: number) {
 }
 
 function colorCapture(event: Event, sensor: SensorDisplay) {
-  if (!customizeCompiler && sensor.color === null) {
+  if (!customizeCompiler.value && sensor.color === null) {
     event.preventDefault()
     event.stopPropagation()
   }

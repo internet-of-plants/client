@@ -12,8 +12,8 @@ cp $SCRIPTPATH/dist/index.html $SCRIPTPATH/dist/404.html
 cp $SCRIPTPATH/LICENSE.md $SCRIPTPATH/dist/
 
 mkdir -p $SCRIPTPATH/../web.internet-of-plants.org
-rm $SCRIPTPATH/../web.internet-of-plants.org/** -r
-cp $SCRIPTPATH/dist/** $SCRIPTPATH/../web.internet-of-plants.org/ -r
+rm -r $SCRIPTPATH/../web.internet-of-plants.org/**
+cp -r $SCRIPTPATH/dist/** $SCRIPTPATH/../web.internet-of-plants.org/
 echo "web.internet-of-plants.org" > $SCRIPTPATH/../web.internet-of-plants.org/CNAME
 
 cd $SCRIPTPATH/../web.internet-of-plants.org
